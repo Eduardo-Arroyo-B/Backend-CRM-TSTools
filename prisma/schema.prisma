@@ -14,7 +14,7 @@ datasource db {
 
 model User {
   id           String    @id @default(uuid()) @db.Uuid
-  usuario      String
+  usuario      String    @unique
   password     String
   activo       Boolean
   ultimo_login DateTime?
@@ -25,4 +25,8 @@ model User {
 
   createAt DateTime @default(now())
   updateAt DateTime @updatedAt
+}
+
+model Orders {
+  id Int @id @default(autoincrement())
 }

@@ -23,11 +23,15 @@ export class AuthService {
     });
   }
 
-  findAll() {
-    return this.prisma.user.findMany();
+  async findAll() {
+    const allUsers = await this.prisma.user.findMany();
+
+    if (!allUsers) throw new NotFoundException('No se encontraron usuarios');
+
+    return allUsers;
   }
 
-  async findOne(id: number) {
+  async findOne(id: string) {
     const user = await this.prisma.user.findUnique({
       where: { id },
     });
@@ -37,7 +41,7 @@ export class AuthService {
     return user;
   }
 
-  async update(id: number, updateAuthDto: UpdateAuthDto) {
+  async update(id: string, updateAuthDto: UpdateAuthDto) {
     await this.findOne(id); // valida que exista
 
     return this.prisma.user.update({
@@ -46,7 +50,7 @@ export class AuthService {
     });
   }
 
-  async remove(id: number) {
+  async remove(id: string) {
     await this.findOne(id); // valida que exista
 
     return this.prisma.user.delete({
