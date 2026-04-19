@@ -1,0 +1,113 @@
+import {
+  Injectable,
+  NotFoundException,
+  HttpException,
+  InternalServerErrorException,
+  BadRequestException,
+} from '@nestjs/common';
+// Otras excepciones comunes: BadRequestException 400 UnauthorizedException 401 ForbiddenException 403 NotFoundException 404 ConflictException 409 InternalServerErrorException 500
+import { CreateClientDto } from './dto/create-client.dto';
+import { UpdateClientDto } from './dto/update-client.dto';
+import { PrismaService } from '../../prisma/prisma.service';
+
+@Injectable()
+export class ClientsService {
+  constructor(private readonly prisma: PrismaService) {}
+
+  async create(createClientDto: CreateClientDto) {
+    try {
+      const createdClient = await this.prisma.clients.create({
+        data: createClientDto,
+      });
+
+      return {
+        message: 'Cliente creado exitosamente',
+        data: createdClient,
+      };
+    } catch (error) {
+      if (error instanceof HttpException) throw error;
+
+      throw new InternalServerErrorException({
+        message: 'Error inesperado',
+        error: error instanceof Error ? error.message : 'Error desconocido',
+      });
+    }
+  }
+
+  async findAll() {
+    try {
+      const findClients = await this.prisma.clients.findMany();
+
+      if (!findClients || findClients.length === 0)
+        throw new BadRequestException('No se encontraron clientes');
+
+      return findClients;
+    } catch (error) {
+      if (error instanceof HttpException) throw error;
+
+      throw new InternalServerErrorException({
+        message: 'Error inesperado',
+        error: error instanceof Error ? error.message : 'Error desconocido',
+      });
+    }
+  }
+
+  async findOne(id: number) {
+    try {
+      const client = await this.prisma.clients.findUnique({
+        where: { id },
+      });
+
+      if (!client) throw new NotFoundException('Cliente no encontrado');
+
+      return client;
+    } catch (error) {
+      if (error instanceof HttpException) throw error;
+
+      throw new InternalServerErrorException({
+        message: 'Error inesperado',
+        error: error instanceof Error ? error.message : 'Error desconocido',
+      });
+    }
+  }
+
+  async update(id: number, updateClientDto: UpdateClientDto) {
+    try {
+      await this.findOne(id);
+
+      const updateClient = await this.prisma.clients.update({
+        where: { id },
+        data: updateClientDto,
+      });
+
+      return {
+        message: 'Cliente actualizado exitosamente',
+        data: updateClient,
+      };
+    } catch (error) {
+      if (error instanceof HttpException) throw error;
+
+      throw new InternalServerErrorException({
+        message: 'Error inesperado',
+        error: error instanceof Error ? error.message : 'Error desconocido',
+      });
+    }
+  }
+
+  async remove(id: number) {
+    try {
+      await this.findOne(id);
+
+      return await this.prisma.clients.delete({
+        where: { id },
+      });
+    } catch (error) {
+      if (error instanceof HttpException) throw error;
+
+      throw new InternalServerErrorException({
+        message: 'Error inesperado',
+        error: error instanceof Error ? error.message : 'Error desconocido',
+      });
+    }
+  }
+}

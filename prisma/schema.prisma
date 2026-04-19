@@ -26,7 +26,10 @@ model User {
   updateAt DateTime @updatedAt
 
   // Relaciones
-  Clients Clients[]
+  Clientes Clients[]
+  Marcas   Brands[]
+  Modelos  Models[]
+  Ordenes  Orders[]
 }
 
 model Clients {
@@ -40,11 +43,46 @@ model Clients {
   creador         String     @db.Uuid
 
   // Relaciones
-  User User @relation(fields: [creador], references: [id])
+  Usuario User     @relation(fields: [creador], references: [id])
+  Ordenes Orders[]
+}
+
+model Brands {
+  id       Int      @id @default(autoincrement())
+  marca    String
+  usuario  String   @db.Uuid
+  createAt DateTime @default(now())
+
+  // Relaciones
+  Usuario User     @relation(fields: [usuario], references: [id])
+  Modelos Models[]
+}
+
+model Models {
+  id        Int    @id @default(autoincrement())
+  nombre    String
+  usuarioId String @db.Uuid
+  brandId   Int
+
+  // Relaciones
+  Marca   Brands @relation(fields: [brandId], references: [id])
+  Usuario User   @relation(fields: [usuarioId], references: [id])
 }
 
 model Orders {
-  id Int @id @default(autoincrement())
+  id          Int      @id @default(autoincrement())
+  clienteId   Int
+  marcaId     Int
+  ModeloId    Int
+  atendio     String   @db.Uuid
+  estado      String
+  total       Int
+  estado_pago String
+  createAt    DateTime @default(now())
+
+  // Relaciones
+  Clientes Clients @relation(fields: [clienteId], references: [id])
+  Usuario  User    @relation(fields: [atendio], references: [id])
 }
 
 enum clientType {
