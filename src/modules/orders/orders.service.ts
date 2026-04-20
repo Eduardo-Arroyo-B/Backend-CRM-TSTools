@@ -2,6 +2,7 @@ import {
   HttpException,
   Injectable,
   InternalServerErrorException,
+  NotFoundException,
 } from '@nestjs/common';
 import { CreateOrderDto } from './dto/create-order.dto';
 import { UpdateOrderDto } from './dto/update-order.dto';
@@ -34,19 +35,114 @@ export class OrdersService {
     }
   }
 
-  findAll() {
-    return `This action returns all orders`;
+  async findAll() {
+    try {
+      const allorders = await this.prisma.orders.findMany({
+        select: {
+          id: true,
+          createAt: true,
+          estado: true,
+          total: true,
+          Clientes: true,
+          estado_pago: true,
+          Usuario: {
+            select: {
+              usuario: true,
+            },
+          },
+        },
+      });
+
+      if (!allorders || allorders.length === 0) {
+        throw new NotFoundException('No se encontraron órdenes');
+      }
+
+      return allorders;
+    } catch (error) {
+      if (error instanceof HttpException) throw error;
+
+      throw new InternalServerErrorException({
+        message: 'Error inesperado',
+        error: error instanceof Error ? error.message : 'Error desconocido',
+      });
+    }
   }
 
-  findOne(id: number) {
-    return `This action returns a #${id} order`;
+  async findOne(id: number) {
+    try {
+      const order = await this.prisma.orders.findUnique({
+        where: { id },
+        select: {
+          id: true,
+          createAt: true,
+          estado: true,
+          total: true,
+          Clientes: true,
+          estado_pago: true,
+          Usuario: {
+            select: {
+              usuario: true,
+            },
+          },
+        },
+      });
+
+      if (!order) {
+        throw new NotFoundException('Orden no encontrada');
+      }
+
+      return order;
+    } catch (error) {
+      if (error instanceof HttpException) throw error;
+
+      throw new InternalServerErrorException({
+        message: 'Error inesperado',
+        error: error instanceof Error ? error.message : 'Error desconocido',
+      });
+    }
   }
 
-  update(id: number, dto: UpdateOrderDto) {
-    return `This action updates a #${id} order`;
+  async update(id: number, dto: UpdateOrderDto) {
+    try {
+      // Valida que la orden exista
+      await this.findOne(id);
+
+      // Hace una copia de los datos a actualizar
+      const dataToUpdate = { ...dto };
+
+      const updatedOrder = await this.prisma.orders.update({
+        where: { id },
+        data: dataToUpdate,
+      });
+
+      return {
+        message: 'Orden actualizada exitosamente',
+        data: updatedOrder,
+      };
+    } catch (error) {
+      if (error instanceof HttpException) throw error;
+
+      throw new InternalServerErrorException({
+        message: 'Error inesperado',
+        error: error instanceof Error ? error.message : 'Error desconocido',
+      });
+    }
   }
 
-  remove(id: number) {
-    return `This action removes a #${id} order`;
+  async remove(id: number) {
+    try {
+      await this.findOne(id);
+
+      return await this.prisma.orders.delete({
+        where: { id },
+      });
+    } catch (error) {
+      if (error instanceof HttpException) throw error;
+
+      throw new InternalServerErrorException({
+        message: 'Error inesperado',
+        error: error instanceof Error ? error.message : 'Error desconocido',
+      });
+    }
   }
 }

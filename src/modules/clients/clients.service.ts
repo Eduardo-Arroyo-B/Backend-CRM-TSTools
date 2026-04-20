@@ -79,11 +79,15 @@ export class ClientsService {
 
   async update(id: number, updateClientDto: UpdateClientDto) {
     try {
+      // Valida que el cliente exista
       await this.findOne(id);
+
+      // Hace una copia de los datos a actualizar
+      const dataToUpdate = { ...updateClientDto };
 
       const updateClient = await this.prisma.clients.update({
         where: { id },
-        data: updateClientDto,
+        data: dataToUpdate,
       });
 
       return {
