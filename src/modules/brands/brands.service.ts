@@ -1,26 +1,83 @@
-import { Injectable } from '@nestjs/common';
+import {
+  HttpException,
+  Injectable,
+  InternalServerErrorException,
+  NotFoundException,
+} from '@nestjs/common';
 import { CreateBrandDto } from './dto/create-brand.dto';
 import { UpdateBrandDto } from './dto/update-brand.dto';
+import { PrismaService } from '../../prisma/prisma.service';
 
 @Injectable()
 export class BrandsService {
-  create(createBrandDto: CreateBrandDto) {
-    return 'This action adds a new brand';
+  constructor(private readonly prisma: PrismaService) {}
+
+  async create(dto: CreateBrandDto, userId: string) {
+    try {
+      const brandExist = await this.prisma.brands.findFirst({
+        where: { marca: dto.marca },
+      });
+
+      if (brandExist) throw new HttpException('La marca ya existe', 400);
+
+      const brand = await this.prisma.brands.create({
+        data: {
+          ...dto,
+          usuario: userId,
+        },
+      });
+
+      return brand;
+    } catch (error) {
+      if (error instanceof HttpException) {
+        throw error;
+      }
+
+      throw new InternalServerErrorException({
+        message: 'Ha ocurrido un error al crear el usuario',
+        error: error instanceof Error ? error.message : 'Error desconocido',
+      });
+    }
   }
 
-  findAll() {
-    return `This action returns all brands`;
+  async findAll() {
+    const allBrands = await this.prisma.brands.findMany();
+
+    if (allBrands.length === 0)
+      throw new NotFoundException('No se encontraron marcas');
+
+    return allBrands;
   }
 
-  findOne(id: number) {
-    return `This action returns a #${id} brand`;
+  async findOne(id: number) {
+    const brand = await this.prisma.brands.findUnique({
+      where: { id },
+    });
+
+    if (!brand) throw new NotFoundException(`Marca con ID ${id} no encontrada`);
+
+    return brand;
   }
 
-  update(id: number, updateBrandDto: UpdateBrandDto) {
-    return `This action updates a #${id} brand`;
+  async update(id: number, updateBrandDto: UpdateBrandDto) {
+    // Valida que el marca exista
+    await this.findOne(id);
+
+    // Hace una copia de los datos a actualizar
+    const dataToUpdate = { ...updateBrandDto };
+
+    return this.prisma.brands.update({
+      where: { id },
+      data: dataToUpdate,
+    });
   }
 
-  remove(id: number) {
-    return `This action removes a #${id} brand`;
+  async remove(id: number) {
+    // Valida que el marca exista
+    await this.findOne(id);
+
+    return this.prisma.brands.delete({
+      where: { id },
+    });
   }
 }

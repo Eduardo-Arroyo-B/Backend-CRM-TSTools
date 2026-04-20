@@ -7,10 +7,11 @@ import { PrismaModule } from './prisma/prisma.module';
 import { OrdersModule } from './modules/orders/orders.module';
 import { CatalogsModule } from './modules/catalogs/catalogs.module';
 import { ClientsModule } from './modules/clients/clients.module';
+import { BrandsModule } from './modules/brands/brands.module';
+import { ModelsModule } from './modules/models/models.module';
 
 @Module({
   imports: [
-    // eslint-disable-next-line @typescript-eslint/no-unsafe-call,@typescript-eslint/no-unsafe-member-access
     ConfigModule.forRoot({
       isGlobal: true,
     }),
@@ -19,6 +20,8 @@ import { ClientsModule } from './modules/clients/clients.module';
     OrdersModule,
     CatalogsModule,
     ClientsModule,
+    BrandsModule,
+    ModelsModule,
   ],
   controllers: [AppController],
   providers: [AppService],

@@ -9,15 +9,21 @@ import {
 import { CreateClientDto } from './dto/create-client.dto';
 import { UpdateClientDto } from './dto/update-client.dto';
 import { PrismaService } from '../../prisma/prisma.service';
+import { UseGuards } from '@nestjs/common';
+import { AuthGuard } from '@nestjs/passport';
 
+@UseGuards(AuthGuard('jwt'))
 @Injectable()
 export class ClientsService {
   constructor(private readonly prisma: PrismaService) {}
 
-  async create(createClientDto: CreateClientDto) {
+  async create(dto: CreateClientDto, userId: string) {
     try {
       const createdClient = await this.prisma.clients.create({
-        data: createClientDto,
+        data: {
+          ...dto,
+          creador: userId,
+        },
       });
 
       return {

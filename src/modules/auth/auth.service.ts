@@ -8,10 +8,38 @@ import { CreateAuthDto } from './dto/create-auth.dto';
 import { UpdateAuthDto } from './dto/update-auth.dto';
 import { PrismaService } from '../../prisma/prisma.service';
 import { hashPassword } from '../../common/utils/password.util';
+import { comparePassword } from '../../common/utils/password.util';
+import { generateToken } from '../../common/utils/JWTToken';
 
 @Injectable()
 export class AuthService {
   constructor(private readonly prisma: PrismaService) {}
+
+  async login(usuario: string, password: string) {
+    const user = await this.prisma.user.findUnique({
+      where: { usuario },
+    });
+
+    if (!user) {
+      throw new NotFoundException('Usuario o contraseña incorrectos');
+    }
+
+    const isPasswordValid = await comparePassword(password, user.password);
+
+    if (!isPasswordValid) {
+      throw new NotFoundException('Usuario o contraseña incorrectos');
+    }
+
+    const payload = {
+      sub: user.id,
+      usuario: user.usuario,
+      activo: user.activo,
+    };
+
+    return {
+      access_token: generateToken(payload),
+    };
+  }
 
   async create(createAuthDto: CreateAuthDto) {
     try {

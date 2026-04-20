@@ -9,19 +9,24 @@ import {
   HttpStatus,
   HttpCode,
   ParseIntPipe,
+  Req,
 } from '@nestjs/common';
 import { ClientsService } from './clients.service';
 import { CreateClientDto } from './dto/create-client.dto';
 import { UpdateClientDto } from './dto/update-client.dto';
+import { RequestWithUser } from '../../common/utils/requestWithUser.utils';
+import { UseGuards } from '@nestjs/common';
+import { AuthGuard } from '@nestjs/passport';
 
+@UseGuards(AuthGuard('jwt'))
 @Controller('clients')
 export class ClientsController {
   constructor(private readonly clientsService: ClientsService) {}
 
   @Post()
   @HttpCode(HttpStatus.CREATED)
-  create(@Body() createClientDto: CreateClientDto) {
-    return this.clientsService.create(createClientDto);
+  create(@Body() dto: CreateClientDto, @Req() req: RequestWithUser) {
+    return this.clientsService.create(dto, req.user.id);
   }
 
   @Get()

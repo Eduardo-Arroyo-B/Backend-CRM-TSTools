@@ -8,19 +8,24 @@ import {
   Delete,
   HttpCode,
   HttpStatus,
+  Req,
 } from '@nestjs/common';
 import { ModelsService } from './models.service';
 import { CreateModelDto } from './dto/create-model.dto';
 import { UpdateModelDto } from './dto/update-model.dto';
+import { RequestWithUser } from '../../common/utils/requestWithUser.utils';
+import { UseGuards } from '@nestjs/common';
+import { AuthGuard } from '@nestjs/passport';
 
+@UseGuards(AuthGuard('jwt'))
 @Controller('models')
 export class ModelsController {
   constructor(private readonly modelsService: ModelsService) {}
 
   @Post()
   @HttpCode(HttpStatus.CREATED)
-  create(@Body() createModelDto: CreateModelDto) {
-    return this.modelsService.create(createModelDto);
+  create(@Body() dto: CreateModelDto, @Req() req: RequestWithUser) {
+    return this.modelsService.create(dto, req.user.id);
   }
 
   @Get()

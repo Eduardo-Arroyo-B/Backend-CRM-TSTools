@@ -36,7 +36,7 @@ model Clients {
   id              Int        @id @default(autoincrement())
   nombre          String
   telefono        String
-  segundoTelefono String
+  segundoTelefono String?
   direccion       String
   tipo            clientType
   fechaCreacion   DateTime   @default(now())
@@ -70,19 +70,32 @@ model Models {
 }
 
 model Orders {
-  id          Int      @id @default(autoincrement())
+  id          Int        @id @default(autoincrement())
   clienteId   Int
   marcaId     Int
-  ModeloId    Int
-  atendio     String   @db.Uuid
-  estado      String
+  modeloId    Int
+  atendio     String     @db.Uuid
+  estado      estado
   total       Int
-  estado_pago String
-  createAt    DateTime @default(now())
+  estado_pago estadoPago
+  createAt    DateTime   @default(now())
 
   // Relaciones
   Clientes Clients @relation(fields: [clienteId], references: [id])
   Usuario  User    @relation(fields: [atendio], references: [id])
+}
+
+enum estado {
+  PENDIENTE
+  ENPROCESO
+  REPARADO
+}
+
+enum estadoPago {
+  PENDIENTE
+  DEBE
+  PAGADO
+  SINCOSTO
 }
 
 enum clientType {

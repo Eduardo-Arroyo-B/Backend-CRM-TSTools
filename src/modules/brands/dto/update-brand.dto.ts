@@ -1,4 +1,8 @@
-import { PartialType } from '@nestjs/mapped-types';
-import { CreateBrandDto } from './create-brand.dto';
+import { IsOptional, IsString, MinLength } from 'class-validator';
 
-export class UpdateBrandDto extends PartialType(CreateBrandDto) {}
+export class UpdateBrandDto {
+  @IsOptional()
+  @IsString({ message: 'La marca debe ser una cadena de texto' })
+  @MinLength(2, { message: 'La marca debe tener al menos 2 caracteres' })
+  marca?: string;
+}

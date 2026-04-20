@@ -1,3 +1,4 @@
+// @ts-ignore
 import bcrypt from 'bcrypt';
 
 export async function hashPassword(password: string): Promise<string> {
