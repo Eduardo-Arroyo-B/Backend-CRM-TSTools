@@ -45,7 +45,17 @@ export class ModelsService {
   }
 
   async findAll() {
-    const allModels = await this.prisma.models.findMany();
+    const allModels = await this.prisma.models.findMany({
+      select: {
+        id: true,
+        nombre: true,
+        Usuario: {
+          select: {
+            usuario: true,
+          },
+        },
+      },
+    });
 
     if (allModels.length === 0)
       throw new NotFoundException('No se encontraron modelos');

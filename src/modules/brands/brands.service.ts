@@ -25,6 +25,16 @@ export class BrandsService {
           ...dto,
           usuario: userId,
         },
+        select: {
+          id: true,
+          marca: true,
+          createAt: true,
+          Usuario: {
+            select: {
+              usuario: true,
+            },
+          },
+        },
       });
 
       return brand;
@@ -41,7 +51,27 @@ export class BrandsService {
   }
 
   async findAll() {
-    const allBrands = await this.prisma.brands.findMany();
+    const allBrands = await this.prisma.brands.findMany({
+      select: {
+        id: true,
+        marca: true,
+        createAt: true,
+        Usuario: {
+          select: {
+            usuario: true,
+          },
+        },
+        Modelos: {
+          select: {
+            id: true,
+            nombre: true,
+          },
+        },
+      },
+      orderBy: {
+        marca: 'desc',
+      },
+    });
 
     if (allBrands.length === 0)
       throw new NotFoundException('No se encontraron marcas');
@@ -69,6 +99,16 @@ export class BrandsService {
     return this.prisma.brands.update({
       where: { id },
       data: dataToUpdate,
+      select: {
+        id: true,
+        marca: true,
+        createAt: true,
+        Usuario: {
+          select: {
+            usuario: true,
+          },
+        },
+      },
     });
   }
 

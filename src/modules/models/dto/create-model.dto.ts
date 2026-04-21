@@ -1,4 +1,4 @@
-import { IsString, IsInt, IsUUID, MinLength, MaxLength } from 'class-validator';
+import { IsString, IsInt, MinLength, MaxLength } from 'class-validator';
 import { Type } from 'class-transformer';
 
 export class CreateModelDto {
@@ -7,7 +7,7 @@ export class CreateModelDto {
   @MaxLength(30, { message: 'El nombre no puede exceder los 30 caracteres' })
   nombre: string;
 
-  @IsInt({ message: 'El brandId debe ser un número entero' })
   @Type(() => Number)
+  @IsInt({ message: 'El brandId debe ser un número entero' })
   brandId: number;
 }

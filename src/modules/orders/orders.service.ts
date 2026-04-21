@@ -43,8 +43,22 @@ export class OrdersService {
           createAt: true,
           estado: true,
           total: true,
-          Clientes: true,
           estado_pago: true,
+          Modelo: {
+            select: {
+              nombre: true,
+            },
+          },
+          Marca: {
+            select: {
+              marca: true,
+            },
+          },
+          Clientes: {
+            select: {
+              nombre: true,
+            },
+          },
           Usuario: {
             select: {
               usuario: true,

@@ -42,7 +42,22 @@ export class ClientsService {
 
   async findAll() {
     try {
-      const findClients = await this.prisma.clients.findMany();
+      const findClients = await this.prisma.clients.findMany({
+        select: {
+          id: true,
+          nombre: true,
+          telefono: true,
+          segundoTelefono: true,
+          direccion: true,
+          tipo: true,
+          fechaCreacion: true,
+          Usuario: {
+            select: {
+              usuario: true,
+            },
+          },
+        },
+      });
 
       if (!findClients || findClients.length === 0)
         throw new BadRequestException('No se encontraron clientes');

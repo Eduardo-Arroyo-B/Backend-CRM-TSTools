@@ -56,6 +56,7 @@ model Brands {
   // Relaciones
   Usuario User     @relation(fields: [usuario], references: [id])
   Modelos Models[]
+  Ordenes Orders[]
 }
 
 model Models {
@@ -65,8 +66,9 @@ model Models {
   brandId   Int
 
   // Relaciones
-  Marca   Brands @relation(fields: [brandId], references: [id])
-  Usuario User   @relation(fields: [usuarioId], references: [id])
+  Marca   Brands   @relation(fields: [brandId], references: [id], onDelete: Cascade)
+  Usuario User     @relation(fields: [usuarioId], references: [id])
+  Ordenes Orders[]
 }
 
 model Orders {
@@ -83,6 +85,8 @@ model Orders {
   // Relaciones
   Clientes Clients @relation(fields: [clienteId], references: [id])
   Usuario  User    @relation(fields: [atendio], references: [id])
+  Marca    Brands  @relation(fields: [marcaId], references: [id])
+  Modelo   Models  @relation(fields: [modeloId], references: [id])
 }
 
 enum estado {
