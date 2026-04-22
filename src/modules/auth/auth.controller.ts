@@ -8,7 +8,9 @@ import {
   Delete,
   HttpCode,
   HttpStatus,
+  Res,
 } from '@nestjs/common';
+import { Response } from 'express';
 import { AuthService } from './auth.service';
 import { CreateAuthDto } from './dto/create-auth.dto';
 import { UpdateAuthDto } from './dto/update-auth.dto';
@@ -17,8 +19,25 @@ import { UpdateAuthDto } from './dto/update-auth.dto';
 export class AuthController {
   constructor(private readonly authService: AuthService) {}
 
+  @Post('login')
+  @HttpCode(HttpStatus.OK)
+  async login(
+    @Body() { usuario, password }: { usuario: string; password: string },
+    @Res({ passthrough: true }) res: Response,
+  ) {
+    const { access_token } = await this.authService.login(usuario, password);
+
+    res.cookie('access_token', access_token, {
+      httpOnly: true,
+      secure: process.env.NODE_ENV === 'production',
+      sameSite: 'strict',
+    });
+
+    return { message: 'Login exitoso' };
+  }
+
   @Post()
-  @HttpCode(201)
+  @HttpCode(HttpStatus.CREATED)
   create(@Body() createAuthDto: CreateAuthDto) {
     return this.authService.create(createAuthDto);
   }
