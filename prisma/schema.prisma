@@ -80,6 +80,7 @@ model Orders {
   estado      estado
   total       Int
   estado_pago estadoPago
+  descripcion String?
   createAt    DateTime   @default(now())
 
   // Relaciones

@@ -5,6 +5,7 @@ import {
   Min,
   IsEnum,
   IsNotEmpty,
+  IsOptional,
 } from 'class-validator';
 import { estadoPago, estado } from '@prisma/client';
 import { Type } from 'class-transformer';
@@ -46,4 +47,8 @@ export class CreateOrderDto {
   })
   @IsNotEmpty({ message: 'estado_pago no puede estar vacío' })
   estado_pago: estadoPago;
+
+  @IsOptional()
+  @IsString({ message: 'El comentario debe ser un texto' })
+  descripcion?: string;
 }

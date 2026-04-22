@@ -29,6 +29,15 @@ export class ModelsService {
           ...dto,
           usuarioId: userId,
         },
+        select: {
+          id: true,
+          nombre: true,
+          Usuario: {
+            select: {
+              usuario: true,
+            },
+          },
+        },
       });
 
       return model;

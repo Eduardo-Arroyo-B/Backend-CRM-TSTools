@@ -44,6 +44,7 @@ export class OrdersService {
           estado: true,
           total: true,
           estado_pago: true,
+          descripcion: true,
           Modelo: {
             select: {
               nombre: true,
