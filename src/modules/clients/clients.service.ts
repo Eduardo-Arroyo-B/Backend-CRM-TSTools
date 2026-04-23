@@ -3,7 +3,6 @@ import {
   NotFoundException,
   HttpException,
   InternalServerErrorException,
-  BadRequestException,
 } from '@nestjs/common';
 // Otras excepciones comunes: BadRequestException 400 UnauthorizedException 401 ForbiddenException 403 NotFoundException 404 ConflictException 409 InternalServerErrorException 500
 import { CreateClientDto } from './dto/create-client.dto';
@@ -12,7 +11,6 @@ import { PrismaService } from '../../prisma/prisma.service';
 import { UseGuards } from '@nestjs/common';
 import { AuthGuard } from '@nestjs/passport';
 
-@UseGuards(AuthGuard('jwt'))
 @Injectable()
 export class ClientsService {
   constructor(private readonly prisma: PrismaService) {}
@@ -58,9 +56,6 @@ export class ClientsService {
           },
         },
       });
-
-      if (!findClients || findClients.length === 0)
-        throw new BadRequestException('No se encontraron clientes');
 
       return findClients;
     } catch (error) {

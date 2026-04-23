@@ -66,9 +66,6 @@ export class ModelsService {
       },
     });
 
-    if (allModels.length === 0)
-      throw new NotFoundException('No se encontraron modelos');
-
     return allModels;
   }
 

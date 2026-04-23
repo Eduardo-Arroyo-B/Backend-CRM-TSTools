@@ -68,10 +68,6 @@ export class OrdersService {
         },
       });
 
-      if (!allorders || allorders.length === 0) {
-        throw new NotFoundException('No se encontraron órdenes');
-      }
-
       return allorders;
     } catch (error) {
       if (error instanceof HttpException) throw error;
