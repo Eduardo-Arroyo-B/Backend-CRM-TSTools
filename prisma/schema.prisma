@@ -90,6 +90,19 @@ model Orders {
   Modelo   Models  @relation(fields: [modeloId], references: [id])
 }
 
+model Services {
+  id               Int      @id @default(autoincrement())
+  tipo             String
+  equipo           String
+  concepto         String
+  marca            String
+  modelo           String
+  garantia         String
+  precio_publico   String
+  precio_mayorista String
+  createAt         DateTime @default(now())
+}
+
 enum estado {
   PENDIENTE
   ENPROCESO
