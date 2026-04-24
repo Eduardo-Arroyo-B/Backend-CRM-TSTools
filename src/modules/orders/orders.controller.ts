@@ -8,13 +8,13 @@ import {
   Delete,
   HttpCode,
   HttpStatus,
+  UseGuards,
   Req,
 } from '@nestjs/common';
 import { OrdersService } from './orders.service';
 import { CreateOrderDto } from './dto/create-order.dto';
 import { UpdateOrderDto } from './dto/update-order.dto';
 import { RequestWithUser } from '../../common/utils/requestWithUser.utils';
-import { UseGuards } from '@nestjs/common';
 import { AuthGuard } from '@nestjs/passport';
 
 @UseGuards(AuthGuard('jwt'))

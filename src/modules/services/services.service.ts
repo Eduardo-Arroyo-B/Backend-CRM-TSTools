@@ -4,26 +4,25 @@ import {
   InternalServerErrorException,
   NotFoundException,
 } from '@nestjs/common';
-import { CreateOrderDto } from './dto/create-order.dto';
-import { UpdateOrderDto } from './dto/update-order.dto';
+import { CreateServiceDto } from './dto/create-service.dto';
+import { UpdateServiceDto } from './dto/update-service.dto';
 import { PrismaService } from '../../prisma/prisma.service';
 
 @Injectable()
-export class OrdersService {
+export class ServicesService {
   constructor(private readonly prisma: PrismaService) {}
 
-  async create(dto: CreateOrderDto, userId: string) {
+  async create(dto: CreateServiceDto) {
     try {
-      const createdOrder = await this.prisma.orders.create({
+      const createService = await this.prisma.services.create({
         data: {
           ...dto,
-          atendio: userId,
         },
       });
 
       return {
-        message: 'Orden creada exitosamente',
-        data: createdOrder,
+        message: 'Servicio creado exitosamente',
+        data: createService,
       };
     } catch (error) {
       if (error instanceof HttpException) throw error;
@@ -37,46 +36,25 @@ export class OrdersService {
 
   async findAll() {
     try {
-      const allorders = await this.prisma.orders.findMany({
+      const allServices = await this.prisma.services.findMany({
         select: {
           id: true,
+          tipo: true,
+          equipo: true,
+          concepto: true,
+          Marca: true,
+          Modelo: true,
+          garantia: true,
+          precio_publico: true,
+          precio_mayorista: true,
           createAt: true,
-          estado: true,
-          total: true,
-          estado_pago: true,
-          descripcion: true,
-          Modelo: {
-            select: {
-              nombre: true,
-            },
-          },
-          Marca: {
-            select: {
-              marca: true,
-            },
-          },
-          Servicio: {
-            select: {
-              tipo: true,
-            },
-          },
-          Clientes: {
-            select: {
-              nombre: true,
-            },
-          },
-          Usuario: {
-            select: {
-              usuario: true,
-            },
-          },
         },
         orderBy: {
           id: 'desc',
         },
       });
 
-      return allorders;
+      return allServices;
     } catch (error) {
       if (error instanceof HttpException) throw error;
 
@@ -89,28 +67,17 @@ export class OrdersService {
 
   async findOne(id: number) {
     try {
-      const order = await this.prisma.orders.findUnique({
+      const service = await this.prisma.services.findUnique({
         where: { id },
-        select: {
-          id: true,
-          createAt: true,
-          estado: true,
-          total: true,
-          Clientes: true,
-          estado_pago: true,
-          Usuario: {
-            select: {
-              usuario: true,
-            },
-          },
-        },
       });
 
-      if (!order) {
-        throw new NotFoundException('Orden no encontrada');
+      if (!service) {
+        throw new NotFoundException({
+          message: 'Servicio no encontrado',
+        });
       }
 
-      return order;
+      return service;
     } catch (error) {
       if (error instanceof HttpException) throw error;
 
@@ -121,22 +88,20 @@ export class OrdersService {
     }
   }
 
-  async update(id: number, dto: UpdateOrderDto) {
+  async update(id: number, updateServiceDto: UpdateServiceDto) {
     try {
-      // Valida que la orden exista
       await this.findOne(id);
 
-      // Hace una copia de los datos a actualizar
-      const dataToUpdate = { ...dto };
+      const dataToUpdate = { ...updateServiceDto };
 
-      const updatedOrder = await this.prisma.orders.update({
+      const updateService = await this.prisma.services.update({
         where: { id },
         data: dataToUpdate,
       });
 
       return {
-        message: 'Orden actualizada exitosamente',
-        data: updatedOrder,
+        message: 'Servicio actualizado exitosamente',
+        service: updateService,
       };
     } catch (error) {
       if (error instanceof HttpException) throw error;
@@ -152,7 +117,7 @@ export class OrdersService {
     try {
       await this.findOne(id);
 
-      return await this.prisma.orders.delete({
+      return await this.prisma.services.delete({
         where: { id },
       });
     } catch (error) {

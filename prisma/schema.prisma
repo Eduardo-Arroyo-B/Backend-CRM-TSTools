@@ -54,9 +54,10 @@ model Brands {
   createAt DateTime @default(now())
 
   // Relaciones
-  Usuario User     @relation(fields: [usuario], references: [id])
-  Modelos Models[]
-  Ordenes Orders[]
+  Usuario   User       @relation(fields: [usuario], references: [id])
+  Modelos   Models[]
+  Ordenes   Orders[]
+  Servicios Services[]
 }
 
 model Models {
@@ -66,9 +67,10 @@ model Models {
   brandId   Int
 
   // Relaciones
-  Marca   Brands   @relation(fields: [brandId], references: [id], onDelete: Cascade)
-  Usuario User     @relation(fields: [usuarioId], references: [id])
-  Ordenes Orders[]
+  Marca     Brands     @relation(fields: [brandId], references: [id], onDelete: Cascade)
+  Usuario   User       @relation(fields: [usuarioId], references: [id])
+  Ordenes   Orders[]
+  Servicios Services[]
 }
 
 model Orders {
@@ -76,6 +78,7 @@ model Orders {
   clienteId   Int
   marcaId     Int
   modeloId    Int
+  servicioId  Int
   atendio     String     @db.Uuid
   estado      estado
   total       Int
@@ -84,10 +87,11 @@ model Orders {
   createAt    DateTime   @default(now())
 
   // Relaciones
-  Clientes Clients @relation(fields: [clienteId], references: [id])
-  Usuario  User    @relation(fields: [atendio], references: [id])
-  Marca    Brands  @relation(fields: [marcaId], references: [id])
-  Modelo   Models  @relation(fields: [modeloId], references: [id])
+  Clientes Clients  @relation(fields: [clienteId], references: [id])
+  Usuario  User     @relation(fields: [atendio], references: [id])
+  Marca    Brands   @relation(fields: [marcaId], references: [id])
+  Modelo   Models   @relation(fields: [modeloId], references: [id])
+  Servicio Services @relation(fields: [servicioId], references: [id])
 }
 
 model Services {
@@ -95,12 +99,17 @@ model Services {
   tipo             String
   equipo           String
   concepto         String
-  marca            String
-  modelo           String
+  marcaId          Int
+  modeloId         Int
   garantia         String
   precio_publico   String
   precio_mayorista String
   createAt         DateTime @default(now())
+
+  // Relaciones
+  Marca   Brands   @relation(fields: [marcaId], references: [id])
+  Modelo  Models   @relation(fields: [modeloId], references: [id])
+  Ordenes Orders[]
 }
 
 enum estado {

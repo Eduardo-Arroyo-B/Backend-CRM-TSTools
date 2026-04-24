@@ -58,11 +58,15 @@ export class ModelsService {
       select: {
         id: true,
         nombre: true,
+        brandId: true,
         Usuario: {
           select: {
             usuario: true,
           },
         },
+      },
+      orderBy: {
+        id: 'desc',
       },
     });
 

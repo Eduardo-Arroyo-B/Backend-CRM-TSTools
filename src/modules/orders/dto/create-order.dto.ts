@@ -28,6 +28,12 @@ export class CreateOrderDto {
   @Type(() => Number)
   modeloId: number;
 
+  @IsInt({ message: 'modeloId debe ser un número entero' })
+  @IsPositive({ message: 'modeloId debe ser mayor a 0' })
+  @IsNotEmpty({ message: 'modeloId no puede estar vacío' })
+  @Type(() => Number)
+  servicioId: number;
+
   @IsString({ message: 'estado debe ser un texto' })
   @IsEnum(estado, {
     message: 'estado debe ser: PENDIENTE, ENPROCESO, REPARADO',
