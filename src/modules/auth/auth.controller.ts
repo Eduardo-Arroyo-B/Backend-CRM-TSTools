@@ -9,11 +9,15 @@ import {
   HttpCode,
   HttpStatus,
   Res,
+  Req,
+  UseGuards,
 } from '@nestjs/common';
 import { Response } from 'express';
 import { AuthService } from './auth.service';
 import { CreateAuthDto } from './dto/create-auth.dto';
 import { UpdateAuthDto } from './dto/update-auth.dto';
+import { AuthGuard } from '@nestjs/passport';
+import { RequestWithUser } from '../../common/utils/requestWithUser.utils';
 
 @Controller('auth')
 export class AuthController {
@@ -35,6 +39,19 @@ export class AuthController {
     });
 
     return { message: 'Login exitoso' };
+  }
+
+  @UseGuards(AuthGuard('jwt'))
+  @Get('me')
+  getMe(@Req() req: RequestWithUser) {
+    return req.user;
+  }
+
+  @Post('logout')
+  @HttpCode(HttpStatus.OK)
+  logout(@Res({ passthrough: true }) res: Response) {
+    res.clearCookie('access_token');
+    return { message: 'Logout exitoso' };
   }
 
   @Post()
