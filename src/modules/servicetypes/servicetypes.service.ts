@@ -4,26 +4,21 @@ import {
   InternalServerErrorException,
   NotFoundException,
 } from '@nestjs/common';
-import { CreateServiceDto } from './dto/create-service.dto';
-import { UpdateServiceDto } from './dto/update-service.dto';
+import { CreateServicetypeDto } from './dto/create-servicetype.dto';
+import { UpdateServicetypeDto } from './dto/update-servicetype.dto';
 import { PrismaService } from '../../prisma/prisma.service';
 
 @Injectable()
-export class ServicesService {
+export class ServicetypesService {
   constructor(private readonly prisma: PrismaService) {}
 
-  async create(dto: CreateServiceDto) {
+  async create(dto: CreateServicetypeDto) {
     try {
-      const createService = await this.prisma.services.create({
-        data: {
-          ...dto,
-        },
+      const createDevice = await this.prisma.serviceTypes.create({
+        data: dto,
       });
 
-      return {
-        message: 'Servicio creado exitosamente',
-        data: createService,
-      };
+      return createDevice;
     } catch (error) {
       if (error instanceof HttpException) throw error;
 
@@ -36,25 +31,9 @@ export class ServicesService {
 
   async findAll() {
     try {
-      const allServices = await this.prisma.services.findMany({
-        select: {
-          id: true,
-          TipoServicio: true,
-          equipoId: true,
-          Concepto: true,
-          Marca: true,
-          Modelo: true,
-          garantia: true,
-          precio_publico: true,
-          precio_mayorista: true,
-          createAt: true,
-        },
-        orderBy: {
-          id: 'desc',
-        },
-      });
+      const allDevices = await this.prisma.serviceTypes.findMany();
 
-      return allServices;
+      return allDevices;
     } catch (error) {
       if (error instanceof HttpException) throw error;
 
@@ -67,17 +46,15 @@ export class ServicesService {
 
   async findOne(id: number) {
     try {
-      const service = await this.prisma.services.findUnique({
+      const device = await this.prisma.serviceTypes.findUnique({
         where: { id },
       });
 
-      if (!service) {
-        throw new NotFoundException({
-          message: 'Servicio no encontrado',
-        });
+      if (!device) {
+        throw new NotFoundException('Tipo de servicio no encontrado');
       }
 
-      return service;
+      return device;
     } catch (error) {
       if (error instanceof HttpException) throw error;
 
@@ -88,21 +65,16 @@ export class ServicesService {
     }
   }
 
-  async update(id: number, updateServiceDto: UpdateServiceDto) {
+  async update(id: number, dto: UpdateServicetypeDto) {
     try {
       await this.findOne(id);
 
-      const dataToUpdate = { ...updateServiceDto };
-
-      const updateService = await this.prisma.services.update({
+      const updateDevice = await this.prisma.serviceTypes.update({
         where: { id },
-        data: dataToUpdate,
+        data: dto,
       });
 
-      return {
-        message: 'Servicio actualizado exitosamente',
-        service: updateService,
-      };
+      return updateDevice;
     } catch (error) {
       if (error instanceof HttpException) throw error;
 
@@ -117,7 +89,7 @@ export class ServicesService {
     try {
       await this.findOne(id);
 
-      return await this.prisma.services.delete({
+      return await this.prisma.serviceTypes.delete({
         where: { id },
       });
     } catch (error) {

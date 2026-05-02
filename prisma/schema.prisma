@@ -97,9 +97,9 @@ model Orders {
 
 model Services {
   id               Int      @id @default(autoincrement())
-  tipo             String
-  equipo           String
-  concepto         String
+  tipo_servicio    Int
+  equipoId         Int
+  conceptoId       Int
   marcaId          Int
   modeloId         Int
   garantia         String
@@ -108,9 +108,36 @@ model Services {
   createAt         DateTime @default(now())
 
   // Relaciones
-  Marca   Brands   @relation(fields: [marcaId], references: [id])
-  Modelo  Models   @relation(fields: [modeloId], references: [id])
-  Ordenes Orders[]
+  Marca        Brands       @relation(fields: [marcaId], references: [id])
+  Modelo       Models       @relation(fields: [modeloId], references: [id])
+  Equipo       Devices      @relation(fields: [equipoId], references: [id])
+  Concepto     Concept      @relation(fields: [conceptoId], references: [id])
+  TipoServicio ServiceTypes @relation(fields: [tipo_servicio], references: [id])
+  Ordenes      Orders[]
+}
+
+model Devices {
+  id     Int    @id @default(autoincrement())
+  nombre String
+
+  // Relaciones
+  Servicios Services[]
+}
+
+model ServiceTypes {
+  id     Int    @id @default(autoincrement())
+  nombre String
+
+  // Relaciones
+  Servicios Services[]
+}
+
+model Concept {
+  id     Int    @id @default(autoincrement())
+  nombre String
+
+  // Relaciones
+  Servicios Services[]
 }
 
 enum estado {

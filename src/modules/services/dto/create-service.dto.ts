@@ -2,17 +2,20 @@ import { IsString, IsNotEmpty, IsNumber } from 'class-validator';
 import { Type } from 'class-transformer';
 
 export class CreateServiceDto {
-  @IsString()
+  @Type(() => Number)
+  @IsNumber()
   @IsNotEmpty()
-  tipo: string;
+  tipo_servicio: number;
 
-  @IsString()
+  @Type(() => Number)
+  @IsNumber()
   @IsNotEmpty()
-  equipo: string;
+  equipoId: number;
 
-  @IsString()
+  @Type(() => Number)
+  @IsNumber()
   @IsNotEmpty()
-  concepto: string;
+  conceptoId: number;
 
   @Type(() => Number)
   @IsNumber()

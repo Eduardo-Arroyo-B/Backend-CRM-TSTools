@@ -56,8 +56,8 @@ export class OrdersService {
             },
           },
           Servicio: {
-            select: {
-              tipo: true,
+            include: {
+              TipoServicio: true,
             },
           },
           Clientes: {

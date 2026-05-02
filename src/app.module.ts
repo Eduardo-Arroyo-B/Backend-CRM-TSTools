@@ -10,6 +10,9 @@ import { ClientsModule } from './modules/clients/clients.module';
 import { BrandsModule } from './modules/brands/brands.module';
 import { ModelsModule } from './modules/models/models.module';
 import { ServicesModule } from './modules/services/services.module';
+import { DevicesModule } from './modules/devices/devices.module';
+import { ConceptModule } from './modules/concept/concept.module';
+import { ServicetypesModule } from './modules/servicetypes/servicetypes.module';
 
 @Module({
   imports: [
@@ -24,6 +27,9 @@ import { ServicesModule } from './modules/services/services.module';
     BrandsModule,
     ModelsModule,
     ServicesModule,
+    DevicesModule,
+    ConceptModule,
+    ServicetypesModule,
   ],
   controllers: [AppController],
   providers: [AppService],
