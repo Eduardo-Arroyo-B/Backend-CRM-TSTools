@@ -40,7 +40,7 @@ export class ServicesService {
         select: {
           id: true,
           TipoServicio: true,
-          equipoId: true,
+          Equipo: true,
           Concepto: true,
           Marca: true,
           Modelo: true,
