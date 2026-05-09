@@ -75,17 +75,38 @@ model Models {
 }
 
 model Orders {
-  id          Int        @id @default(autoincrement())
-  clienteId   Int
-  marcaId     Int
-  modeloId    Int
-  servicioId  Int
-  atendio     String     @db.Uuid
+  id Int @id @default(autoincrement())
+
+  clienteId  Int
+  marcaId    Int
+  modeloId   Int
+  servicioId Int
+
+  atendio String @db.Uuid
+
   estado      estado
-  total       Int
   estado_pago estadoPago
+
+  total       Int
   descripcion String?
-  createAt    DateTime   @default(now())
+
+  // DATOS EQUIPO
+  imei       String?
+  enciende   Boolean @default(true)
+  bateria    Boolean @default(true)
+  bandejaSim Boolean @default(true)
+  golpes     Boolean @default(false)
+  mojado     Boolean @default(false)
+
+  // EXTRA
+  contrasena    String?
+  observaciones String?
+
+  // COMERCIAL
+  garantia Int?
+  pago     Int?
+
+  createAt DateTime @default(now())
 
   // Relaciones
   Clientes Clients  @relation(fields: [clienteId], references: [id])
@@ -125,8 +146,10 @@ model Devices {
 }
 
 model ServiceTypes {
-  id     Int    @id @default(autoincrement())
-  nombre String
+  id          Int     @id @default(autoincrement())
+  nombre      String
+  descripcion String
+  activo      Boolean
 
   // Relaciones
   Servicios Services[]
