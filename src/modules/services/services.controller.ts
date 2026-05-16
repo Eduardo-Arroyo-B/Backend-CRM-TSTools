@@ -7,11 +7,14 @@ import {
   Param,
   Delete,
   UseGuards,
+  UploadedFile,
+  UseInterceptors,
 } from '@nestjs/common';
 import { ServicesService } from './services.service';
 import { CreateServiceDto } from './dto/create-service.dto';
 import { UpdateServiceDto } from './dto/update-service.dto';
 import { AuthGuard } from '@nestjs/passport';
+import { FileInterceptor } from '@nestjs/platform-express';
 
 @UseGuards(AuthGuard('jwt'))
 @Controller('services')
@@ -19,8 +22,20 @@ export class ServicesController {
   constructor(private readonly servicesService: ServicesService) {}
 
   @Post()
-  create(@Body() dto: CreateServiceDto) {
-    return this.servicesService.create(dto);
+  @UseInterceptors(
+    FileInterceptor('image', {
+      limits: {
+        fieldSize: 5 * 1024 * 1024,
+      },
+    }),
+  )
+  create(
+    @Body() dto: CreateServiceDto,
+    @UploadedFile() file?: Express.Multer.File,
+  ) {
+    console.log('BODY', dto);
+    console.log('FILE', file);
+    return this.servicesService.create(dto, file);
   }
 
   @Get()
@@ -34,8 +49,8 @@ export class ServicesController {
   }
 
   @Patch(':id')
-  update(@Param('id') id: string, @Body() updateServiceDto: UpdateServiceDto) {
-    return this.servicesService.update(+id, updateServiceDto);
+  update(@Param('id') id: string, @Body() dto: UpdateServiceDto) {
+    return this.servicesService.update(+id, dto);
   }
 
   @Delete(':id')

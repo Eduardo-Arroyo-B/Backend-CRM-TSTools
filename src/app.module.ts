@@ -13,6 +13,7 @@ import { ServicesModule } from './modules/services/services.module';
 import { DevicesModule } from './modules/devices/devices.module';
 import { ConceptModule } from './modules/concept/concept.module';
 import { ServicetypesModule } from './modules/servicetypes/servicetypes.module';
+import { CloudfareModule } from './modules/cloudfare/cloudfare.module';
 
 @Module({
   imports: [
@@ -30,6 +31,7 @@ import { ServicetypesModule } from './modules/servicetypes/servicetypes.module';
     DevicesModule,
     ConceptModule,
     ServicetypesModule,
+    CloudfareModule,
   ],
   controllers: [AppController],
   providers: [AppService],

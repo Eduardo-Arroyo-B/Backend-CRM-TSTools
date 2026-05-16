@@ -126,6 +126,9 @@ model Services {
   garantia         String
   precio_publico   String
   precio_mayorista String
+  notas            String?
+  proceso          String?
+  fotoURL          String?
   createAt         DateTime @default(now())
 
   // Relaciones

@@ -1,4 +1,4 @@
-import { IsString, IsNotEmpty, IsNumber } from 'class-validator';
+import { IsString, IsNotEmpty, IsNumber, IsOptional } from 'class-validator';
 import { Type } from 'class-transformer';
 
 export class CreateServiceDto {
@@ -38,4 +38,19 @@ export class CreateServiceDto {
   @IsString()
   @IsNotEmpty()
   precio_mayorista: string;
+
+  @IsOptional()
+  @IsString()
+  notas?: string;
+
+  @IsOptional()
+  @IsString()
+  proceso?: string;
+
+  @IsOptional()
+  @IsString()
+  fotoURL?: string;
+
+  @IsOptional()
+  image?: string;
 }

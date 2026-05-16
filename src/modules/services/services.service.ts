@@ -7,16 +7,29 @@ import {
 import { CreateServiceDto } from './dto/create-service.dto';
 import { UpdateServiceDto } from './dto/update-service.dto';
 import { PrismaService } from '../../prisma/prisma.service';
+import { CloudfareService } from '../cloudfare/cloudfare.service';
 
 @Injectable()
 export class ServicesService {
-  constructor(private readonly prisma: PrismaService) {}
+  constructor(
+    private readonly prisma: PrismaService,
+    private readonly cloudfareService: CloudfareService,
+  ) {}
 
-  async create(dto: CreateServiceDto) {
+  async create(dto: CreateServiceDto, file?: Express.Multer.File) {
     try {
+      let imageUrl: string | null = null;
+
+      if (file) {
+        const imageId = await this.cloudfareService.uploadImage(file);
+
+        imageUrl = this.cloudfareService.buildImageUrl(imageId);
+      }
+
       const createService = await this.prisma.services.create({
         data: {
           ...dto,
+          fotoURL: imageUrl,
         },
       });
 
@@ -47,6 +60,9 @@ export class ServicesService {
           garantia: true,
           precio_publico: true,
           precio_mayorista: true,
+          notas: true,
+          proceso: true,
+          fotoURL: true,
           createAt: true,
         },
         orderBy: {
