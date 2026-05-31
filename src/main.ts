@@ -17,6 +17,7 @@ async function bootstrap() {
       'http://localhost:3000',
       'http://localhost:5173',
       'https://crmtstools.netlify.app',
+      'https://frontend-crm-cykoi.ondigitalocean.app',
     ],
     methods: 'GET,PUT,PATCH,POST,DELETE',
     credentials: true,
