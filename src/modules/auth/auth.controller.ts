@@ -41,6 +41,32 @@ export class AuthController {
     return { message: 'Login exitoso' };
   }
 
+  @Get('google')
+  @UseGuards(AuthGuard('google'))
+  async googleLogin() {
+    // Passport redirecciona automáticamente a Google
+  }
+
+  @Get('google/callback')
+  @UseGuards(AuthGuard('google'))
+  async googleCallback(
+    @Req() req: any,
+    @Res({ passthrough: true }) res: Response,
+  ) {
+    const { access_token } = await this.authService.loginWithGoogle(req.user);
+
+    res.cookie('access_token', access_token, {
+      httpOnly: true,
+      secure: process.env.NODE_ENV === 'production',
+      sameSite: process.env.NODE_ENV === 'production' ? 'none' : 'lax',
+      maxAge: 1000 * 60 * 60 * 24,
+    });
+
+    return res.redirect(
+      process.env.FRONTEND_URL || 'http://localhost:5173/dashboard',
+    );
+  }
+
   @UseGuards(AuthGuard('jwt'))
   @Get('me')
   getMe(@Req() req: RequestWithUser) {

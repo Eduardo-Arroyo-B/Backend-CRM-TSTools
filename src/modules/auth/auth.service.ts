@@ -24,6 +24,12 @@ export class AuthService {
       throw new NotFoundException('Usuario o contraseña incorrectos');
     }
 
+    if (!user.password) {
+      throw new NotFoundException(
+        'Este usuario utiliza inicio de sesión con Google',
+      );
+    }
+
     const isPasswordValid = await comparePassword(password, user.password);
 
     if (!isPasswordValid) {
@@ -34,6 +40,51 @@ export class AuthService {
       sub: user.id,
       usuario: user.usuario,
       activo: user.activo,
+    };
+
+    return {
+      access_token: generateToken(payload),
+    };
+  }
+
+  async loginWithGoogle(googleUser: any) {
+    const email = googleUser.email;
+
+    let user = await this.prisma.user.findUnique({
+      where: {
+        email,
+      },
+    });
+
+    if (!user) {
+      const username = email.split('@')[0];
+
+      user = await this.prisma.user.create({
+        data: {
+          usuario: username,
+          email,
+          activo: true,
+          googleId: googleUser.googleId,
+          password: null,
+          ultimo_login: new Date(),
+        },
+      });
+    } else {
+      await this.prisma.user.update({
+        where: {
+          id: user.id,
+        },
+        data: {
+          ultimo_login: new Date(),
+        },
+      });
+    }
+
+    const payload = {
+      sub: user.id,
+      usuario: user.usuario,
+      activo: user.activo,
+      email: user.email,
     };
 
     return {
