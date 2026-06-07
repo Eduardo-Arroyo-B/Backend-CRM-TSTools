@@ -15,7 +15,7 @@ export class BrandsService {
   async create(dto: CreateBrandDto, userId: string, tenantId: string) {
     try {
       const brandExist = await this.prisma.brands.findFirst({
-        where: { marca: dto.marca },
+        where: { marca: dto.marca, tenantId },
       });
 
       if (brandExist) throw new HttpException('La marca ya existe', 400);
