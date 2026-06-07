@@ -26,19 +26,19 @@ export class ClientsController {
   @Post()
   @HttpCode(HttpStatus.CREATED)
   create(@Body() dto: CreateClientDto, @Req() req: RequestWithUser) {
-    return this.clientsService.create(dto, req.user.id);
+    return this.clientsService.create(dto, req.user.id, req.user.tenantId);
   }
 
   @Get()
   @HttpCode(HttpStatus.OK)
-  findAll() {
-    return this.clientsService.findAll();
+  findAll(@Req() req: RequestWithUser) {
+    return this.clientsService.findAll(req.user.tenantId);
   }
 
   @Get(':id')
   @HttpCode(HttpStatus.OK)
-  findOne(@Param('id', ParseIntPipe) id: number) {
-    return this.clientsService.findOne(id);
+  findOne(@Param('id', ParseIntPipe) id: number, @Req() req: RequestWithUser) {
+    return this.clientsService.findOne(id, req.user.tenantId);
   }
 
   @Patch(':id')
@@ -46,13 +46,14 @@ export class ClientsController {
   update(
     @Param('id', ParseIntPipe) id: number,
     @Body() updateClientDto: UpdateClientDto,
+    @Req() req: RequestWithUser,
   ) {
-    return this.clientsService.update(id, updateClientDto);
+    return this.clientsService.update(id, updateClientDto, req.user.tenantId);
   }
 
   @Delete(':id')
   @HttpCode(HttpStatus.NO_CONTENT)
-  remove(@Param('id', ParseIntPipe) id: number) {
-    return this.clientsService.remove(id);
+  remove(@Param('id', ParseIntPipe) id: number, @Req() req: RequestWithUser) {
+    return this.clientsService.remove(id, req.user.tenantId);
   }
 }

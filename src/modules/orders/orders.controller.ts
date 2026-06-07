@@ -25,30 +25,34 @@ export class OrdersController {
   @Post()
   @HttpCode(HttpStatus.CREATED)
   create(@Body() dto: CreateOrderDto, @Req() req: RequestWithUser) {
-    return this.ordersService.create(dto, req.user.id);
+    return this.ordersService.create(dto, req.user.id, req.user.tenantId);
   }
 
   @Get()
   @HttpCode(HttpStatus.OK)
-  findAll() {
-    return this.ordersService.findAll();
+  findAll(@Req() req: RequestWithUser) {
+    return this.ordersService.findAll(req.user.tenantId);
   }
 
   @Get(':id')
   @HttpCode(HttpStatus.OK)
-  findOne(@Param('id') id: string) {
-    return this.ordersService.findOne(+id);
+  findOne(@Param('id') id: string, @Req() req: RequestWithUser) {
+    return this.ordersService.findOne(+id, req.user.tenantId);
   }
 
   @Patch(':id')
   @HttpCode(HttpStatus.OK)
-  update(@Param('id') id: string, @Body() updateOrderDto: UpdateOrderDto) {
-    return this.ordersService.update(+id, updateOrderDto);
+  update(
+    @Param('id') id: string,
+    @Body() updateOrderDto: UpdateOrderDto,
+    @Req() req: RequestWithUser,
+  ) {
+    return this.ordersService.update(+id, updateOrderDto, req.user.tenantId);
   }
 
   @Delete(':id')
   @HttpCode(HttpStatus.NO_CONTENT)
-  remove(@Param('id') id: string) {
-    return this.ordersService.remove(+id);
+  remove(@Param('id') id: string, @Req() req: RequestWithUser) {
+    return this.ordersService.remove(+id, req.user.tenantId);
   }
 }

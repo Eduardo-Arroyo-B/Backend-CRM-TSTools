@@ -12,11 +12,12 @@ import { PrismaService } from '../../prisma/prisma.service';
 export class ModelsService {
   constructor(private readonly prisma: PrismaService) {}
 
-  async create(dto: CreateModelDto, userId: string) {
+  async create(dto: CreateModelDto, userId: string, tenantId: string) {
     try {
       const modelExist = await this.prisma.models.findFirst({
         where: {
           nombre: dto.nombre,
+          tenantId,
         },
       });
 
@@ -28,6 +29,7 @@ export class ModelsService {
         data: {
           ...dto,
           usuarioId: userId,
+          tenantId,
         },
         select: {
           id: true,
@@ -53,8 +55,11 @@ export class ModelsService {
     }
   }
 
-  async findAll() {
+  async findAll(tenantId: string) {
     const allModels = await this.prisma.models.findMany({
+      where: {
+        tenantId,
+      },
       select: {
         id: true,
         nombre: true,
@@ -73,9 +78,9 @@ export class ModelsService {
     return allModels;
   }
 
-  async findOne(id: number) {
+  async findOne(id: number, tenantId: string) {
     const model = await this.prisma.models.findUnique({
-      where: { id },
+      where: { id, tenantId },
     });
 
     if (!model)
@@ -84,26 +89,26 @@ export class ModelsService {
     return model;
   }
 
-  async update(id: number, updateModelDto: UpdateModelDto) {
+  async update(id: number, updateModelDto: UpdateModelDto, tenantId: string) {
     // Valida que el modelo exista
-    await this.findOne(id);
+    await this.findOne(id, tenantId);
 
     // Hace una copia de los datos a actualizar
     const dataToUpdate = { ...updateModelDto };
 
     // Se actualiza el modelo
     return this.prisma.models.update({
-      where: { id },
+      where: { id, tenantId },
       data: dataToUpdate,
     });
   }
 
-  async remove(id: number) {
+  async remove(id: number, tenantId: string) {
     // Valida que el modelo exista
-    await this.findOne(id);
+    await this.findOne(id, tenantId);
 
     return this.prisma.models.delete({
-      where: { id },
+      where: { id, tenantId },
     });
   }
 }

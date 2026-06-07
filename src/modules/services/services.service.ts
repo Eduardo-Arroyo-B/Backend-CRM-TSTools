@@ -16,7 +16,11 @@ export class ServicesService {
     private readonly cloudfareService: CloudfareService,
   ) {}
 
-  async create(dto: CreateServiceDto, file?: Express.Multer.File) {
+  async create(
+    dto: CreateServiceDto,
+    tenantId: string,
+    file?: Express.Multer.File,
+  ) {
     try {
       let imageUrl: string | null = null;
 
@@ -30,6 +34,7 @@ export class ServicesService {
         data: {
           ...dto,
           fotoURL: imageUrl,
+          tenantId,
         },
       });
 
@@ -47,9 +52,12 @@ export class ServicesService {
     }
   }
 
-  async findAll() {
+  async findAll(tenantId: string) {
     try {
       const allServices = await this.prisma.services.findMany({
+        where: {
+          tenantId,
+        },
         select: {
           id: true,
           TipoServicio: true,
@@ -81,10 +89,10 @@ export class ServicesService {
     }
   }
 
-  async findOne(id: number) {
+  async findOne(id: number, tenantId: string) {
     try {
       const service = await this.prisma.services.findUnique({
-        where: { id },
+        where: { id, tenantId },
       });
 
       if (!service) {
@@ -104,14 +112,18 @@ export class ServicesService {
     }
   }
 
-  async update(id: number, updateServiceDto: UpdateServiceDto) {
+  async update(
+    id: number,
+    updateServiceDto: UpdateServiceDto,
+    tenantId: string,
+  ) {
     try {
-      await this.findOne(id);
+      await this.findOne(id, tenantId);
 
       const dataToUpdate = { ...updateServiceDto };
 
       const updateService = await this.prisma.services.update({
-        where: { id },
+        where: { id, tenantId },
         data: dataToUpdate,
       });
 
@@ -129,12 +141,12 @@ export class ServicesService {
     }
   }
 
-  async remove(id: number) {
+  async remove(id: number, tenantId: string) {
     try {
-      await this.findOne(id);
+      await this.findOne(id, tenantId);
 
       return await this.prisma.services.delete({
-        where: { id },
+        where: { id, tenantId },
       });
     } catch (error) {
       if (error instanceof HttpException) throw error;

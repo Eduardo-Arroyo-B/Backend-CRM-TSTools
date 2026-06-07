@@ -12,12 +12,13 @@ import { PrismaService } from '../../prisma/prisma.service';
 export class OrdersService {
   constructor(private readonly prisma: PrismaService) {}
 
-  async create(dto: CreateOrderDto, userId: string) {
+  async create(dto: CreateOrderDto, userId: string, tenantId: string) {
     try {
       const createdOrder = await this.prisma.orders.create({
         data: {
           ...dto,
           atendio: userId,
+          tenantId,
         },
       });
 
@@ -35,9 +36,12 @@ export class OrdersService {
     }
   }
 
-  async findAll() {
+  async findAll(tenantId: string) {
     try {
       const allorders = await this.prisma.orders.findMany({
+        where: {
+          tenantId,
+        },
         select: {
           id: true,
           createAt: true,
@@ -87,10 +91,10 @@ export class OrdersService {
     }
   }
 
-  async findOne(id: number) {
+  async findOne(id: number, tenantId: string) {
     try {
-      const order = await this.prisma.orders.findUnique({
-        where: { id },
+      const order = await this.prisma.orders.findFirst({
+        where: { id, tenantId },
         select: {
           id: true,
           createAt: true,
@@ -121,16 +125,27 @@ export class OrdersService {
     }
   }
 
-  async update(id: number, dto: UpdateOrderDto) {
+  async update(id: number, dto: UpdateOrderDto, tenantId: string) {
     try {
       // Valida que la orden exista
-      await this.findOne(id);
+      await this.findOne(id, tenantId);
 
       // Hace una copia de los datos a actualizar
       const dataToUpdate = { ...dto };
 
+      const order = await this.prisma.orders.findFirst({
+        where: {
+          id,
+          tenantId,
+        },
+      });
+
+      if (!order) {
+        throw new NotFoundException('Orden no encontrada');
+      }
+
       const updatedOrder = await this.prisma.orders.update({
-        where: { id },
+        where: { id, tenantId },
         data: dataToUpdate,
       });
 
@@ -148,12 +163,12 @@ export class OrdersService {
     }
   }
 
-  async remove(id: number) {
+  async remove(id: number, tenantId: string) {
     try {
-      await this.findOne(id);
+      await this.findOne(id, tenantId);
 
       return await this.prisma.orders.delete({
-        where: { id },
+        where: { id, tenantId },
       });
     } catch (error) {
       if (error instanceof HttpException) throw error;
