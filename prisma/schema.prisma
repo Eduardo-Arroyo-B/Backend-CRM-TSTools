@@ -33,6 +33,8 @@ model User {
   Marcas   Brands[]
   Modelos  Models[]
   Ordenes  Orders[]
+  tenant   Tenant?   @relation(fields: [tenantId], references: [id])
+  tenantId String?   @db.Uuid
 }
 
 model Clients {
@@ -46,8 +48,10 @@ model Clients {
   creador         String     @db.Uuid
 
   // Relaciones
-  Usuario User     @relation(fields: [creador], references: [id])
-  Ordenes Orders[]
+  Usuario  User     @relation(fields: [creador], references: [id])
+  Ordenes  Orders[]
+  tenant   Tenant?  @relation(fields: [tenantId], references: [id])
+  tenantId String?  @db.Uuid
 }
 
 model Brands {
@@ -61,6 +65,8 @@ model Brands {
   Modelos   Models[]
   Ordenes   Orders[]
   Servicios Services[]
+  tenant    Tenant?    @relation(fields: [tenantId], references: [id])
+  tenantId  String?    @db.Uuid
 }
 
 model Models {
@@ -74,6 +80,8 @@ model Models {
   Usuario   User       @relation(fields: [usuarioId], references: [id])
   Ordenes   Orders[]
   Servicios Services[]
+  tenant    Tenant?    @relation(fields: [tenantId], references: [id])
+  tenantId  String?    @db.Uuid
 }
 
 model Orders {
@@ -118,6 +126,8 @@ model Orders {
   Marca    Brands   @relation(fields: [marcaId], references: [id])
   Modelo   Models   @relation(fields: [modeloId], references: [id])
   Servicio Services @relation(fields: [servicioId], references: [id])
+  tenant   Tenant?  @relation(fields: [tenantId], references: [id])
+  tenantId String?  @db.Uuid
 }
 
 model Services {
@@ -142,6 +152,8 @@ model Services {
   Concepto     Concept      @relation(fields: [conceptoId], references: [id])
   TipoServicio ServiceTypes @relation(fields: [tipo_servicio], references: [id])
   Ordenes      Orders[]
+  tenant       Tenant?      @relation(fields: [tenantId], references: [id])
+  tenantId     String?      @db.Uuid
 }
 
 model Devices {
@@ -168,6 +180,21 @@ model Concept {
 
   // Relaciones
   Servicios Services[]
+}
+
+model Tenant {
+  id     String @id @default(uuid()) @db.Uuid
+  nombre String
+
+  createAt DateTime @default(now())
+  updateAt DateTime @updatedAt
+
+  usuarios  User[]
+  clientes  Clients[]
+  marcas    Brands[]
+  modelos   Models[]
+  ordenes   Orders[]
+  servicios Services[]
 }
 
 enum estado {

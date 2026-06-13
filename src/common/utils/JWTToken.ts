@@ -20,6 +20,7 @@ export function generateToken(payload: {
   sub: any;
   usuario: any;
   activo: any;
+  tenantId: any;
 }): string {
   return jwt.sign(payload, getJwtSecret(), {
     algorithm: 'HS256',

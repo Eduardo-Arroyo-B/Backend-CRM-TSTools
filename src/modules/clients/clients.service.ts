@@ -15,12 +15,13 @@ import { AuthGuard } from '@nestjs/passport';
 export class ClientsService {
   constructor(private readonly prisma: PrismaService) {}
 
-  async create(dto: CreateClientDto, userId: string) {
+  async create(dto: CreateClientDto, userId: string, tenantId: string) {
     try {
       const createdClient = await this.prisma.clients.create({
         data: {
           ...dto,
           creador: userId,
+          tenantId,
         },
       });
 
@@ -38,9 +39,10 @@ export class ClientsService {
     }
   }
 
-  async findAll() {
+  async findAll(tenantId: string) {
     try {
       const findClients = await this.prisma.clients.findMany({
+        where: { tenantId },
         select: {
           id: true,
           nombre: true,
@@ -68,10 +70,10 @@ export class ClientsService {
     }
   }
 
-  async findOne(id: number) {
+  async findOne(id: number, tenantId: string) {
     try {
       const client = await this.prisma.clients.findUnique({
-        where: { id },
+        where: { id, tenantId },
       });
 
       if (!client) throw new NotFoundException('Cliente no encontrado');
@@ -87,16 +89,16 @@ export class ClientsService {
     }
   }
 
-  async update(id: number, updateClientDto: UpdateClientDto) {
+  async update(id: number, updateClientDto: UpdateClientDto, tenantId: string) {
     try {
       // Valida que el cliente exista
-      await this.findOne(id);
+      await this.findOne(id, tenantId);
 
       // Hace una copia de los datos a actualizar
       const dataToUpdate = { ...updateClientDto };
 
       const updateClient = await this.prisma.clients.update({
-        where: { id },
+        where: { id, tenantId },
         data: dataToUpdate,
       });
 
@@ -114,12 +116,12 @@ export class ClientsService {
     }
   }
 
-  async remove(id: number) {
+  async remove(id: number, tenantId: string) {
     try {
-      await this.findOne(id);
+      await this.findOne(id, tenantId);
 
       return await this.prisma.clients.delete({
-        where: { id },
+        where: { id, tenantId },
       });
     } catch (error) {
       if (error instanceof HttpException) throw error;

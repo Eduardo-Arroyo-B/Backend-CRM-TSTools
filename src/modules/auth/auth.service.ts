@@ -40,6 +40,7 @@ export class AuthService {
       sub: user.id,
       usuario: user.usuario,
       activo: user.activo,
+      tenantId: user.tenantId,
     };
 
     return {
@@ -59,6 +60,12 @@ export class AuthService {
     if (!user) {
       const username = email.split('@')[0];
 
+      const tenant = await this.prisma.tenant.create({
+        data: {
+          nombre: `${username} Workspace`,
+        },
+      });
+
       user = await this.prisma.user.create({
         data: {
           usuario: username,
@@ -67,6 +74,8 @@ export class AuthService {
           googleId: googleUser.googleId,
           password: null,
           ultimo_login: new Date(),
+
+          tenantId: tenant.id,
         },
       });
     } else {
@@ -85,6 +94,7 @@ export class AuthService {
       usuario: user.usuario,
       activo: user.activo,
       email: user.email,
+      tenantId: user.tenantId,
     };
 
     return {

@@ -12,10 +12,10 @@ import { PrismaService } from '../../prisma/prisma.service';
 export class BrandsService {
   constructor(private readonly prisma: PrismaService) {}
 
-  async create(dto: CreateBrandDto, userId: string) {
+  async create(dto: CreateBrandDto, userId: string, tenantId: string) {
     try {
       const brandExist = await this.prisma.brands.findFirst({
-        where: { marca: dto.marca },
+        where: { marca: dto.marca, tenantId },
       });
 
       if (brandExist) throw new HttpException('La marca ya existe', 400);
@@ -24,6 +24,7 @@ export class BrandsService {
         data: {
           ...dto,
           usuario: userId,
+          tenantId,
         },
         select: {
           id: true,
@@ -50,8 +51,9 @@ export class BrandsService {
     }
   }
 
-  async findAll() {
+  async findAll(tenantId: string) {
     const allBrands = await this.prisma.brands.findMany({
+      where: { tenantId },
       select: {
         id: true,
         marca: true,
@@ -79,9 +81,9 @@ export class BrandsService {
     return allBrands;
   }
 
-  async findOne(id: number) {
+  async findOne(id: number, tenantId: string) {
     const brand = await this.prisma.brands.findUnique({
-      where: { id },
+      where: { id, tenantId },
     });
 
     if (!brand) throw new NotFoundException(`Marca con ID ${id} no encontrada`);
@@ -89,15 +91,15 @@ export class BrandsService {
     return brand;
   }
 
-  async update(id: number, updateBrandDto: UpdateBrandDto) {
+  async update(id: number, updateBrandDto: UpdateBrandDto, tenantId: string) {
     // Valida que el marca exista
-    await this.findOne(id);
+    await this.findOne(id, tenantId);
 
     // Hace una copia de los datos a actualizar
     const dataToUpdate = { ...updateBrandDto };
 
     return this.prisma.brands.update({
-      where: { id },
+      where: { id, tenantId },
       data: dataToUpdate,
       select: {
         id: true,
@@ -112,12 +114,12 @@ export class BrandsService {
     });
   }
 
-  async remove(id: number) {
+  async remove(id: number, tenantId: string) {
     // Valida que el marca exista
-    await this.findOne(id);
+    await this.findOne(id, tenantId);
 
     return this.prisma.brands.delete({
-      where: { id },
+      where: { id, tenantId },
     });
   }
 }
