@@ -58,6 +58,11 @@ export class OrdersService {
           estado_pago: true,
           descripcion: true,
           trackingToken: true,
+          Tecnico: {
+            select: {
+              nombre: true,
+            },
+          },
           Modelo: {
             select: {
               nombre: true,
@@ -222,6 +227,33 @@ export class OrdersService {
 
       return {
         message: 'Orden actualizada exitosamente',
+        data: updatedOrder,
+      };
+    } catch (error) {
+      if (error instanceof HttpException) throw error;
+
+      throw new InternalServerErrorException({
+        message: 'Error inesperado',
+        error: error instanceof Error ? error.message : 'Error desconocido',
+      });
+    }
+  }
+
+  async finalizar(id: number, tenantId: string) {
+    try {
+      const findOrder = await this.findOne(id, tenantId);
+
+      if (!findOrder) {
+        throw new NotFoundException('Orden no encontrada');
+      }
+
+      const updatedOrder = await this.prisma.orders.update({
+        where: { id, tenantId },
+        data: { estado: 'REPARADO', estado_pago: 'PAGADO' },
+      });
+
+      return {
+        message: 'Orden finalizada exitosamente',
         data: updatedOrder,
       };
     } catch (error) {

@@ -76,6 +76,13 @@ export class OrdersController {
   }
 
   @UseGuards(AuthGuard('jwt'))
+  @Patch('finalizar/:id')
+  @HttpCode(HttpStatus.OK)
+  findTecnico(@Param('id') id: string, @Req() req: RequestWithUser) {
+    return this.ordersService.finalizar(+id, req.user.tenantId);
+  }
+
+  @UseGuards(AuthGuard('jwt'))
   @Delete(':id')
   @HttpCode(HttpStatus.NO_CONTENT)
   remove(@Param('id') id: string, @Req() req: RequestWithUser) {
