@@ -9,6 +9,7 @@ import { CreateOrderDto } from './dto/create-order.dto';
 import { UpdateOrderDto } from './dto/update-order.dto';
 import { PrismaService } from '../../prisma/prisma.service';
 import CryptoJS from 'crypto-js';
+import { UpdateOrderStatusDto } from './dto/update-order-status.dto';
 
 @Injectable()
 export class OrdersService {
@@ -190,6 +191,33 @@ export class OrdersService {
       const updatedOrder = await this.prisma.orders.update({
         where: { id, tenantId },
         data: dataToUpdate,
+      });
+
+      return {
+        message: 'Orden actualizada exitosamente',
+        data: updatedOrder,
+      };
+    } catch (error) {
+      if (error instanceof HttpException) throw error;
+
+      throw new InternalServerErrorException({
+        message: 'Error inesperado',
+        error: error instanceof Error ? error.message : 'Error desconocido',
+      });
+    }
+  }
+
+  async updateStatus(id: number, dto: UpdateOrderStatusDto, tenantId: string) {
+    try {
+      const findOrder = await this.findOne(id, tenantId);
+
+      if (!findOrder) {
+        throw new NotFoundException('Orden no encontrada');
+      }
+
+      const updatedOrder = await this.prisma.orders.update({
+        where: { id, tenantId },
+        data: dto,
       });
 
       return {

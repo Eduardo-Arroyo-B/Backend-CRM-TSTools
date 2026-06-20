@@ -33,8 +33,9 @@ model User {
   Marcas   Brands[]
   Modelos  Models[]
   Ordenes  Orders[]
-  tenant   Tenant?   @relation(fields: [tenantId], references: [id])
-  tenantId String?   @db.Uuid
+  Tecnicos Technical[]
+  tenant   Tenant?     @relation(fields: [tenantId], references: [id])
+  tenantId String?     @db.Uuid
 }
 
 model Clients {
@@ -186,12 +187,15 @@ model Concept {
 }
 
 model Technical {
-  id Int @id @default(autoincrement())
-
-  nombre String
+  id        Int     @id @default(autoincrement())
+  nombre    String
+  usuarioId String  @db.Uuid
+  tenantId  String? @db.Uuid
 
   // Relaciones
-  Ordenes Orders[]
+  Ordenes  Orders[]
+  Usuarios User     @relation(fields: [usuarioId], references: [id])
+  Tenant   Tenant?  @relation(fields: [tenantId], references: [id])
 }
 
 model Tenant {
@@ -207,6 +211,7 @@ model Tenant {
   modelos   Models[]
   ordenes   Orders[]
   servicios Services[]
+  tecnicos  Technical[]
 }
 
 enum estado {
