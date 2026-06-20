@@ -33,8 +33,9 @@ model User {
   Marcas   Brands[]
   Modelos  Models[]
   Ordenes  Orders[]
-  tenant   Tenant?   @relation(fields: [tenantId], references: [id])
-  tenantId String?   @db.Uuid
+  Tecnicos Technical[]
+  tenant   Tenant?     @relation(fields: [tenantId], references: [id])
+  tenantId String?     @db.Uuid
 }
 
 model Clients {
@@ -111,6 +112,8 @@ model Orders {
   // EXTRA
   contrasena    String?
   observaciones String?
+  comentarios   String?
+  tecnicoId     Int?
 
   // COMERCIAL
   garantia Int?
@@ -121,13 +124,14 @@ model Orders {
   createAt      DateTime @default(now())
 
   // Relaciones
-  Clientes Clients  @relation(fields: [clienteId], references: [id])
-  Usuario  User     @relation(fields: [atendio], references: [id])
-  Marca    Brands   @relation(fields: [marcaId], references: [id])
-  Modelo   Models   @relation(fields: [modeloId], references: [id])
-  Servicio Services @relation(fields: [servicioId], references: [id])
-  tenant   Tenant?  @relation(fields: [tenantId], references: [id])
-  tenantId String?  @db.Uuid
+  Clientes Clients    @relation(fields: [clienteId], references: [id])
+  Usuario  User       @relation(fields: [atendio], references: [id])
+  Marca    Brands     @relation(fields: [marcaId], references: [id])
+  Modelo   Models     @relation(fields: [modeloId], references: [id])
+  Servicio Services   @relation(fields: [servicioId], references: [id])
+  Tecnico  Technical? @relation(fields: [tecnicoId], references: [id])
+  tenant   Tenant?    @relation(fields: [tenantId], references: [id])
+  tenantId String?    @db.Uuid
 }
 
 model Services {
@@ -182,6 +186,18 @@ model Concept {
   Servicios Services[]
 }
 
+model Technical {
+  id        Int     @id @default(autoincrement())
+  nombre    String
+  usuarioId String  @db.Uuid
+  tenantId  String? @db.Uuid
+
+  // Relaciones
+  Ordenes  Orders[]
+  Usuarios User     @relation(fields: [usuarioId], references: [id])
+  Tenant   Tenant?  @relation(fields: [tenantId], references: [id])
+}
+
 model Tenant {
   id     String @id @default(uuid()) @db.Uuid
   nombre String
@@ -195,6 +211,7 @@ model Tenant {
   modelos   Models[]
   ordenes   Orders[]
   servicios Services[]
+  tecnicos  Technical[]
 }
 
 enum estado {

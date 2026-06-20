@@ -14,6 +14,7 @@ import { DevicesModule } from './modules/devices/devices.module';
 import { ConceptModule } from './modules/concept/concept.module';
 import { ServicetypesModule } from './modules/servicetypes/servicetypes.module';
 import { CloudfareModule } from './modules/cloudfare/cloudfare.module';
+import { TechnicalModule } from './modules/technical/technical.module';
 
 @Module({
   imports: [
@@ -32,6 +33,7 @@ import { CloudfareModule } from './modules/cloudfare/cloudfare.module';
     ConceptModule,
     ServicetypesModule,
     CloudfareModule,
+    TechnicalModule,
   ],
   controllers: [AppController],
   providers: [AppService],
