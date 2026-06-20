@@ -10,6 +10,7 @@ import {
   HttpStatus,
   UseGuards,
   Req,
+  Query,
 } from '@nestjs/common';
 import { OrdersService } from './orders.service';
 import { CreateOrderDto } from './dto/create-order.dto';
@@ -35,10 +36,16 @@ export class OrdersController {
     return this.ordersService.findAll(req.user.tenantId);
   }
 
+  @UseGuards(AuthGuard('jwt'))
   @Get(':id')
   @HttpCode(HttpStatus.OK)
   findOne(@Param('id') id: string, @Req() req: RequestWithUser) {
-    return this.ordersService.findOne(+id, req?.user?.tenantId);
+    return this.ordersService.findOne(+id, req.user.tenantId);
+  }
+
+  @Get('tracking/:id')
+  async tracking(@Param('id') id: string, @Query('token') token: string) {
+    return this.ordersService.findTracking(+id, token);
   }
 
   @UseGuards(AuthGuard('jwt'))

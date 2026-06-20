@@ -2,11 +2,13 @@ import {
   HttpException,
   Injectable,
   InternalServerErrorException,
+  UnauthorizedException,
   NotFoundException,
 } from '@nestjs/common';
 import { CreateOrderDto } from './dto/create-order.dto';
 import { UpdateOrderDto } from './dto/update-order.dto';
 import { PrismaService } from '../../prisma/prisma.service';
+import CryptoJS from 'crypto-js';
 
 @Injectable()
 export class OrdersService {
@@ -14,11 +16,16 @@ export class OrdersService {
 
   async create(dto: CreateOrderDto, userId: string, tenantId: string) {
     try {
+      // eslint-disable-next-line @typescript-eslint/no-unsafe-assignment,@typescript-eslint/no-unsafe-call,@typescript-eslint/no-unsafe-member-access
+      const trackingToken = CryptoJS.lib.WordArray.random(32).toString();
+
       const createdOrder = await this.prisma.orders.create({
         data: {
           ...dto,
           atendio: userId,
           tenantId,
+          // eslint-disable-next-line @typescript-eslint/no-unsafe-assignment
+          trackingToken,
         },
       });
 
@@ -49,6 +56,7 @@ export class OrdersService {
           total: true,
           estado_pago: true,
           descripcion: true,
+          trackingToken: true,
           Modelo: {
             select: {
               nombre: true,
@@ -67,7 +75,6 @@ export class OrdersService {
           Clientes: {
             select: {
               nombre: true,
-              telefono: true,
             },
           },
           Usuario: {
@@ -92,12 +99,12 @@ export class OrdersService {
     }
   }
 
-  async findOne(id: number, tenantId?: string) {
+  async findOne(id: number, tenantId: string) {
     try {
       const order = await this.prisma.orders.findFirst({
         where: {
           id,
-          ...(tenantId && { tenantId }),
+          tenantId,
         },
         select: {
           id: true,
@@ -127,6 +134,38 @@ export class OrdersService {
         error: error instanceof Error ? error.message : 'Error desconocido',
       });
     }
+  }
+
+  async findTracking(id: number, token: string) {
+    if (!token) {
+      throw new UnauthorizedException('Token requerido');
+    }
+
+    const order = await this.prisma.orders.findFirst({
+      where: {
+        id,
+        trackingToken: token,
+      },
+      select: {
+        id: true,
+        createAt: true,
+        estado: true,
+        total: true,
+        Clientes: true,
+        estado_pago: true,
+        Usuario: {
+          select: {
+            usuario: true,
+          },
+        },
+      },
+    });
+
+    if (!order) {
+      throw new NotFoundException('Orden no encontrada');
+    }
+
+    return order;
   }
 
   async update(id: number, dto: UpdateOrderDto, tenantId: string) {

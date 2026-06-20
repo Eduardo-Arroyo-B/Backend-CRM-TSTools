@@ -118,7 +118,9 @@ model Orders {
   garantia Int?
   pago     Int?
 
-  createAt DateTime @default(now())
+  // Validacion para seguimiento
+  trackingToken String   @unique
+  createAt      DateTime @default(now())
 
   // Relaciones
   Clientes Clients    @relation(fields: [clienteId], references: [id])
