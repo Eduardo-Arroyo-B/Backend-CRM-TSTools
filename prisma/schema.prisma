@@ -111,6 +111,8 @@ model Orders {
   // EXTRA
   contrasena    String?
   observaciones String?
+  comentarios   String?
+  tecnicoId     Int?
 
   // COMERCIAL
   garantia Int?
@@ -119,13 +121,14 @@ model Orders {
   createAt DateTime @default(now())
 
   // Relaciones
-  Clientes Clients  @relation(fields: [clienteId], references: [id])
-  Usuario  User     @relation(fields: [atendio], references: [id])
-  Marca    Brands   @relation(fields: [marcaId], references: [id])
-  Modelo   Models   @relation(fields: [modeloId], references: [id])
-  Servicio Services @relation(fields: [servicioId], references: [id])
-  tenant   Tenant?  @relation(fields: [tenantId], references: [id])
-  tenantId String?  @db.Uuid
+  Clientes Clients    @relation(fields: [clienteId], references: [id])
+  Usuario  User       @relation(fields: [atendio], references: [id])
+  Marca    Brands     @relation(fields: [marcaId], references: [id])
+  Modelo   Models     @relation(fields: [modeloId], references: [id])
+  Servicio Services   @relation(fields: [servicioId], references: [id])
+  Tecnico  Technical? @relation(fields: [tecnicoId], references: [id])
+  tenant   Tenant?    @relation(fields: [tenantId], references: [id])
+  tenantId String?    @db.Uuid
 }
 
 model Services {
@@ -178,6 +181,15 @@ model Concept {
 
   // Relaciones
   Servicios Services[]
+}
+
+model Technical {
+  id Int @id @default(autoincrement())
+
+  nombre String
+
+  // Relaciones
+  Ordenes Orders[]
 }
 
 model Tenant {

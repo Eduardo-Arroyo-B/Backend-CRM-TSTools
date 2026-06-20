@@ -67,6 +67,7 @@ export class OrdersService {
           Clientes: {
             select: {
               nombre: true,
+              telefono: true,
             },
           },
           Usuario: {
@@ -91,10 +92,13 @@ export class OrdersService {
     }
   }
 
-  async findOne(id: number, tenantId: string) {
+  async findOne(id: number, tenantId?: string) {
     try {
       const order = await this.prisma.orders.findFirst({
-        where: { id, tenantId },
+        where: {
+          id,
+          ...(tenantId && { tenantId }),
+        },
         select: {
           id: true,
           createAt: true,
