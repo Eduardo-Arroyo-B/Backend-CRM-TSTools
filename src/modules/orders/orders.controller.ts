@@ -77,6 +77,13 @@ export class OrdersController {
   }
 
   @UseGuards(AuthGuard('jwt'))
+  @Patch('statusReturn/:id')
+  @HttpCode(HttpStatus.OK)
+  updateStatusReturn(@Param('id') id: string, @Req() req: RequestWithUser) {
+    return this.ordersService.updateStatusReturn(+id, req.user.tenantId);
+  }
+
+  @UseGuards(AuthGuard('jwt'))
   @Patch('comments/:id')
   @HttpCode(HttpStatus.OK)
   updateComments(

@@ -247,6 +247,37 @@ export class OrdersService {
     }
   }
 
+  async updateStatusReturn(id: number, tenantId: string) {
+    try {
+      const findOrder = await this.findOne(id, tenantId);
+
+      if (!findOrder) {
+        throw new NotFoundException('Orden no encontrada');
+      }
+
+      const updatedOrder = await this.prisma.orders.update({
+        where: { id, tenantId },
+        data: {
+          estado: 'PENDIENTE',
+          observaciones: '',
+          tecnicoId: null,
+        },
+      });
+
+      return {
+        message: 'Estado actualizado exitosamente',
+        udata: updatedOrder,
+      };
+    } catch (error) {
+      if (error instanceof HttpException) throw error;
+
+      throw new InternalServerErrorException({
+        message: 'Error inesperado',
+        error: error instanceof Error ? error.message : 'Error desconocido',
+      });
+    }
+  }
+
   async updateComments(id: number, dto: UpdateCommentDto, tenantId: string) {
     try {
       const findOrder = await this.findOne(id, tenantId);
@@ -263,6 +294,33 @@ export class OrdersService {
       return {
         message: 'Comentario Actualizado/Creado Exitosamente',
         data: updateComment,
+      };
+    } catch (error) {
+      if (error instanceof HttpException) throw error;
+
+      throw new InternalServerErrorException({
+        message: 'Error inesperado',
+        error: error instanceof Error ? error.message : 'Error desconocido',
+      });
+    }
+  }
+
+  async estadoPago(id: number, tenantId: string) {
+    try {
+      const findOrder = await this.findOne(id, tenantId);
+
+      if (!findOrder) {
+        throw new NotFoundException('Orden no encontrada');
+      }
+
+      const updatedOrder = await this.prisma.orders.update({
+        where: { id, tenantId },
+        data: { estado_pago: 'PAGADO' },
+      });
+
+      return {
+        message: 'Estado de pago actualizado exitosamente',
+        data: updatedOrder,
       };
     } catch (error) {
       if (error instanceof HttpException) throw error;
