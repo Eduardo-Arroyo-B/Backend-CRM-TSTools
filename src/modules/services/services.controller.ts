@@ -36,8 +36,6 @@ export class ServicesController {
     @Req() req: RequestWithUser,
     @UploadedFile() file?: Express.Multer.File,
   ) {
-    console.log('BODY', dto);
-    console.log('FILE', file);
     return this.servicesService.create(dto, req.user.tenantId, file);
   }
 
