@@ -176,14 +176,17 @@ model ServiceTypes {
 
   // Relaciones
   Servicios Services[]
+  Conceptos Concept[]
 }
 
 model Concept {
-  id     Int    @id @default(autoincrement())
-  nombre String
+  id            Int    @id @default(autoincrement())
+  serviceTypeId Int
+  nombre        String
 
   // Relaciones
-  Servicios Services[]
+  Servicios      Services[]
+  TiposServicios ServiceTypes @relation(fields: [serviceTypeId], references: [id])
 }
 
 model Technical {

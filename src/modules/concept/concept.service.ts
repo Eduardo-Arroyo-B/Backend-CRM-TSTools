@@ -31,7 +31,17 @@ export class ConceptService {
 
   async findAll() {
     try {
-      const allConcept = await this.prisma.concept.findMany();
+      const allConcept = await this.prisma.concept.findMany({
+        select: {
+          id: true,
+          nombre: true,
+          TiposServicios: {
+            select: {
+              nombre: true,
+            },
+          },
+        },
+      });
 
       return allConcept;
     } catch (error) {

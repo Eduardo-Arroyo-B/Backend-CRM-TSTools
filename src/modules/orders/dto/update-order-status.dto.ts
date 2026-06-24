@@ -4,7 +4,7 @@ import { estado } from '@prisma/client';
 
 export class UpdateOrderStatusDto {
   @IsNotEmpty()
-  comentarios: string;
+  observaciones: string;
 
   @Type(() => Number)
   @IsNotEmpty()

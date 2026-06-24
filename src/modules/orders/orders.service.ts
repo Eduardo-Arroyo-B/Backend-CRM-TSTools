@@ -7,6 +7,7 @@ import {
 } from '@nestjs/common';
 import { CreateOrderDto } from './dto/create-order.dto';
 import { UpdateOrderDto } from './dto/update-order.dto';
+import { UpdateCommentDto } from './dto/update-comment.dto';
 import { PrismaService } from '../../prisma/prisma.service';
 import CryptoJS from 'crypto-js';
 import { UpdateOrderStatusDto } from './dto/update-order-status.dto';
@@ -58,6 +59,8 @@ export class OrdersService {
           estado_pago: true,
           descripcion: true,
           trackingToken: true,
+          observaciones: true,
+          comentarios: true,
           Tecnico: {
             select: {
               nombre: true,
@@ -74,8 +77,13 @@ export class OrdersService {
             },
           },
           Servicio: {
-            include: {
-              TipoServicio: true,
+            select: {
+              TipoServicio: {
+                select: {
+                  nombre: true,
+                  descripcion: true,
+                },
+              },
             },
           },
           Clientes: {
@@ -239,6 +247,33 @@ export class OrdersService {
     }
   }
 
+  async updateComments(id: number, dto: UpdateCommentDto, tenantId: string) {
+    try {
+      const findOrder = await this.findOne(id, tenantId);
+
+      if (!findOrder) {
+        throw new NotFoundException('Orden no encontrada');
+      }
+
+      const updateComment = await this.prisma.orders.update({
+        where: { id, tenantId },
+        data: dto,
+      });
+
+      return {
+        message: 'Comentario Actualizado/Creado Exitosamente',
+        data: updateComment,
+      };
+    } catch (error) {
+      if (error instanceof HttpException) throw error;
+
+      throw new InternalServerErrorException({
+        message: 'Error inesperado',
+        error: error instanceof Error ? error.message : 'Error desconocido',
+      });
+    }
+  }
+
   async finalizar(id: number, tenantId: string) {
     try {
       const findOrder = await this.findOne(id, tenantId);
@@ -249,7 +284,7 @@ export class OrdersService {
 
       const updatedOrder = await this.prisma.orders.update({
         where: { id, tenantId },
-        data: { estado: 'REPARADO', estado_pago: 'PAGADO' },
+        data: { estado: 'REPARADO' },
       });
 
       return {

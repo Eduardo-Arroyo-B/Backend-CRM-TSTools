@@ -18,6 +18,7 @@ import { UpdateOrderDto } from './dto/update-order.dto';
 import { UpdateOrderStatusDto } from './dto/update-order-status.dto';
 import { RequestWithUser } from '../../common/utils/requestWithUser.utils';
 import { AuthGuard } from '@nestjs/passport';
+import { UpdateCommentDto } from './dto/update-comment.dto';
 
 @Controller('orders')
 export class OrdersController {
@@ -71,6 +72,21 @@ export class OrdersController {
     return this.ordersService.updateStatus(
       +id,
       updateOrderStatusDto,
+      req.user.tenantId,
+    );
+  }
+
+  @UseGuards(AuthGuard('jwt'))
+  @Patch('comments/:id')
+  @HttpCode(HttpStatus.OK)
+  updateComments(
+    @Param('id') id: string,
+    @Body() updateCommentDto: UpdateCommentDto,
+    @Req() req: RequestWithUser,
+  ) {
+    return this.ordersService.updateComments(
+      +id,
+      updateCommentDto,
       req.user.tenantId,
     );
   }
