@@ -58,7 +58,7 @@ export class ModelsService {
   async findAll(tenantId: string) {
     const allModels = await this.prisma.models.findMany({
       where: {
-        tenantId,
+        OR: [{ tenantId: null }, { tenantId }],
       },
       select: {
         id: true,

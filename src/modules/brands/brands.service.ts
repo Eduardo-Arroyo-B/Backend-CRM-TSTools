@@ -53,7 +53,9 @@ export class BrandsService {
 
   async findAll(tenantId: string) {
     const allBrands = await this.prisma.brands.findMany({
-      where: { tenantId },
+      where: {
+        OR: [{ tenantId: null }, { tenantId }],
+      },
       select: {
         id: true,
         marca: true,

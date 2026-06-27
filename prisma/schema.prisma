@@ -59,6 +59,7 @@ model Brands {
   id       Int      @id @default(autoincrement())
   marca    String
   usuario  String   @db.Uuid
+  tenantId String?  @db.Uuid
   createAt DateTime @default(now())
 
   // Relaciones
@@ -67,13 +68,15 @@ model Brands {
   Ordenes   Orders[]
   Servicios Services[]
   tenant    Tenant?    @relation(fields: [tenantId], references: [id])
-  tenantId  String?    @db.Uuid
+
+  @@unique([marca, tenantId])
 }
 
 model Models {
-  id        Int    @id @default(autoincrement())
+  id        Int     @id @default(autoincrement())
   nombre    String
-  usuarioId String @db.Uuid
+  usuarioId String  @db.Uuid
+  tenantId  String? @db.Uuid
   brandId   Int
 
   // Relaciones
@@ -82,7 +85,8 @@ model Models {
   Ordenes   Orders[]
   Servicios Services[]
   tenant    Tenant?    @relation(fields: [tenantId], references: [id])
-  tenantId  String?    @db.Uuid
+
+  @@unique([brandId, nombre, tenantId])
 }
 
 model Orders {
