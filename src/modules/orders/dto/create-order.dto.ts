@@ -93,10 +93,6 @@ export class CreateOrderDto {
   @IsString({ message: 'La contraseña debe ser texto' })
   contrasena?: string;
 
-  @IsOptional()
-  @IsString({ message: 'Las observaciones deben ser texto' })
-  observaciones?: string;
-
   // =========================
   // COMERCIAL
   // =========================

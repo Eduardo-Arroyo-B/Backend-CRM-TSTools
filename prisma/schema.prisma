@@ -115,8 +115,8 @@ model Orders {
 
   // EXTRA
   contrasena    String?
-  observaciones String?
-  comentarios   String?
+  observaciones Observaciones[]
+  comentarios   Comentarios[]
   tecnicoId     Int?
 
   // COMERCIAL
@@ -191,6 +191,26 @@ model Concept {
   // Relaciones
   Servicios      Services[]
   TiposServicios ServiceTypes @relation(fields: [serviceTypeId], references: [id])
+}
+
+model Observaciones {
+  id          Int      @id @default(autoincrement())
+  ordenId     Int
+  observacion String
+  createAt    DateTime @default(now())
+
+  // Relaciones
+  orders Orders? @relation(fields: [ordenId], references: [id])
+}
+
+model Comentarios {
+  id         Int      @id @default(autoincrement())
+  ordenId    Int
+  comentario String
+  createAt   DateTime @default(now())
+
+  // Relaciones
+  orders Orders? @relation(fields: [ordenId], references: [id])
 }
 
 model Technical {

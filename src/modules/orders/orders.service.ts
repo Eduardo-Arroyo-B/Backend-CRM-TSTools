@@ -255,18 +255,25 @@ export class OrdersService {
         throw new NotFoundException('Orden no encontrada');
       }
 
-      const updatedOrder = await this.prisma.orders.update({
-        where: { id, tenantId },
-        data: {
-          estado: 'PENDIENTE',
-          observaciones: '',
-          tecnicoId: null,
-        },
-      });
+      const updatedOrder = await this.prisma.$transaction([
+        this.prisma.comentarios.deleteMany({
+          where: { ordenId: id },
+        }),
+        this.prisma.observaciones.deleteMany({
+          where: { ordenId: id },
+        }),
+        this.prisma.orders.update({
+          where: { id, tenantId },
+          data: {
+            estado: 'PENDIENTE',
+            tecnicoId: null,
+          },
+        }),
+      ]);
 
       return {
         message: 'Estado actualizado exitosamente',
-        udata: updatedOrder,
+        data: updatedOrder,
       };
     } catch (error) {
       if (error instanceof HttpException) throw error;
@@ -288,12 +295,37 @@ export class OrdersService {
 
       const updateComment = await this.prisma.orders.update({
         where: { id, tenantId },
-        data: dto,
+        data: {
+          comentario: dto.comentarios,
+        },
       });
 
       return {
         message: 'Comentario Actualizado/Creado Exitosamente',
         data: updateComment,
+      };
+    } catch (error) {
+      if (error instanceof HttpException) throw error;
+
+      throw new InternalServerErrorException({
+        message: 'Error inesperado',
+        error: error instanceof Error ? error.message : 'Error desconocido',
+      });
+    }
+  }
+
+  async createComment(id: number, dto: UpdateCommentDto) {
+    try {
+      const comment = await this.prisma.comentarios.create({
+        data: {
+          ordenId: id,
+          comentario: dto.comentarios,
+        },
+      });
+
+      return {
+        message: 'Comentario creado exitosamente',
+        data: comment,
       };
     } catch (error) {
       if (error instanceof HttpException) throw error;
