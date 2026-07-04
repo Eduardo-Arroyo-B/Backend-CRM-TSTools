@@ -40,6 +40,10 @@ export class CloudfareService {
       );
       return response.data.result.id;
     } catch (error) {
+      console.error(error.response?.data);
+      console.error(error.response?.status);
+      console.error(error.response?.headers);
+
       throw new InternalServerErrorException({
         message: 'Error al subir imagen a Cloudflare',
         error: error instanceof Error ? error.message : 'Error desconocido',
