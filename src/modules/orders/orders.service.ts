@@ -8,6 +8,8 @@ import {
 import { CreateOrderDto } from './dto/create-order.dto';
 import { UpdateOrderDto } from './dto/update-order.dto';
 import { UpdateCommentDto } from './dto/update-comment.dto';
+import { createCommentDto } from './dto/create-comment.dto';
+import { createObservationDto } from './dto/create-observation.dto';
 import { PrismaService } from '../../prisma/prisma.service';
 import CryptoJS from 'crypto-js';
 import { UpdateOrderStatusDto } from './dto/update-order-status.dto';
@@ -59,8 +61,18 @@ export class OrdersService {
           estado_pago: true,
           descripcion: true,
           trackingToken: true,
-          observaciones: true,
-          comentarios: true,
+          observaciones: {
+            select: {
+              id: true,
+              observacion: true,
+            },
+          },
+          comentarios: {
+            select: {
+              id: true,
+              comentario: true,
+            },
+          },
           Tecnico: {
             select: {
               nombre: true,
@@ -296,7 +308,11 @@ export class OrdersService {
       const updateComment = await this.prisma.orders.update({
         where: { id, tenantId },
         data: {
-          comentario: dto.comentarios,
+          comentarios: {
+            create: {
+              comentario: dto.comentarios,
+            },
+          },
         },
       });
 
@@ -314,7 +330,7 @@ export class OrdersService {
     }
   }
 
-  async createComment(id: number, dto: UpdateCommentDto) {
+  async createComment(id: number, dto: createCommentDto) {
     try {
       const comment = await this.prisma.comentarios.create({
         data: {
@@ -326,6 +342,29 @@ export class OrdersService {
       return {
         message: 'Comentario creado exitosamente',
         data: comment,
+      };
+    } catch (error) {
+      if (error instanceof HttpException) throw error;
+
+      throw new InternalServerErrorException({
+        message: 'Error inesperado',
+        error: error instanceof Error ? error.message : 'Error desconocido',
+      });
+    }
+  }
+
+  async createObservations(id: number, dto: createObservationDto) {
+    try {
+      const observations = await this.prisma.observaciones.create({
+        data: {
+          ordenId: id,
+          observacion: dto.observacion,
+        },
+      });
+
+      return {
+        message: 'Comentario creado exitosamente',
+        data: observations,
       };
     } catch (error) {
       if (error instanceof HttpException) throw error;

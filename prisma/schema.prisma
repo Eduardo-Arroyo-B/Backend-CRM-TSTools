@@ -226,8 +226,9 @@ model Technical {
 }
 
 model Tenant {
-  id     String @id @default(uuid()) @db.Uuid
-  nombre String
+  id      String  @id @default(uuid()) @db.Uuid
+  nombre  String
+  logoURL String?
 
   createAt DateTime @default(now())
   updateAt DateTime @updatedAt

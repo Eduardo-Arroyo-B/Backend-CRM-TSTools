@@ -64,6 +64,7 @@ export class ModelsService {
         id: true,
         nombre: true,
         brandId: true,
+        tenantId: true,
         Usuario: {
           select: {
             usuario: true,

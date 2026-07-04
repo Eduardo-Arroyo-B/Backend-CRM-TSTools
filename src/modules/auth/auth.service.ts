@@ -10,6 +10,7 @@ import { PrismaService } from '../../prisma/prisma.service';
 import { hashPassword } from '../../common/utils/password.util';
 import { comparePassword } from '../../common/utils/password.util';
 import { generateToken } from '../../common/utils/JWTToken';
+import { CloudfareService } from '../cloudfare/cloudfare.service';
 
 @Injectable()
 export class AuthService {

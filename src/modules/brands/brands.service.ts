@@ -60,6 +60,7 @@ export class BrandsService {
         id: true,
         marca: true,
         createAt: true,
+        tenantId: true,
         Usuario: {
           select: {
             usuario: true,

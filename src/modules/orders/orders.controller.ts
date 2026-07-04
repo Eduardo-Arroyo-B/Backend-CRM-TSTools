@@ -15,6 +15,8 @@ import {
 import { OrdersService } from './orders.service';
 import { CreateOrderDto } from './dto/create-order.dto';
 import { UpdateOrderDto } from './dto/update-order.dto';
+import { createCommentDto } from './dto/create-comment.dto';
+import { createObservationDto } from './dto/create-observation.dto';
 import { UpdateOrderStatusDto } from './dto/update-order-status.dto';
 import { RequestWithUser } from '../../common/utils/requestWithUser.utils';
 import { AuthGuard } from '@nestjs/passport';
@@ -96,6 +98,26 @@ export class OrdersController {
       updateCommentDto,
       req.user.tenantId,
     );
+  }
+
+  @UseGuards(AuthGuard('jwt'))
+  @Post('createComments/:id')
+  @HttpCode(HttpStatus.OK)
+  createComment(
+    @Param('id') id: string,
+    @Body() createCommentDto: createCommentDto,
+  ) {
+    return this.ordersService.createComment(+id, createCommentDto);
+  }
+
+  @UseGuards(AuthGuard('jwt'))
+  @Post('createObservation/:id')
+  @HttpCode(HttpStatus.OK)
+  createObservation(
+    @Param('id') id: string,
+    @Body() createObservationDto: createObservationDto,
+  ) {
+    return this.ordersService.createObservations(+id, createObservationDto);
   }
 
   @UseGuards(AuthGuard('jwt'))
