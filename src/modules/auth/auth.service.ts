@@ -208,7 +208,6 @@ export class AuthService {
   }
 
   async uploadTenantLogo(tenantId: string, file: Express.Multer.File) {
-    console.log("1");
     try {
       const tenant = await this.prisma.tenant.findUnique({
         where: {
@@ -219,34 +218,22 @@ export class AuthService {
           logoURL: true,
         },
       });
-      console.log("2");
-      console.log(tenant);
 
       if (!tenant) {
         throw new NotFoundException('Tenant no encontrado');
       }
 
-      console.log("3");
-
       if (tenant?.logoURL) {
-        console.log("4");
         const imageId = this.cloudfareService.extractImageId(tenant.logoURL);
-
-        console.log("5");
 
         if (imageId) {
           await this.cloudfareService.deleteImage(imageId);
         }
 
-        console.log("6");
         console.log('Imagen anterior eliminada');
       }
 
-      console.log("7");
-
       const imageId = await this.cloudfareService.uploadImage(file);
-
-      console.log("8");
 
       const imageUrl = this.cloudfareService.buildImageUrl(imageId);
 
@@ -271,7 +258,6 @@ export class AuthService {
         data: updatedTenant,
       };
     } catch (error) {
-      console.error(error);
       if (error instanceof HttpException) throw error;
 
       throw new InternalServerErrorException({
