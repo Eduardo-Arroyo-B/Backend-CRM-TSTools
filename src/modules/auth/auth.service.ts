@@ -14,11 +14,21 @@ import { CloudfareService } from '../cloudfare/cloudfare.service';
 
 @Injectable()
 export class AuthService {
-  constructor(private readonly prisma: PrismaService) {}
+  constructor(
+    private readonly prisma: PrismaService,
+    private readonly cloudfareService: CloudfareService,
+  ) {}
 
   async login(usuario: string, password: string) {
     const user = await this.prisma.user.findUnique({
       where: { usuario },
+      include: {
+        tenant: {
+          select: {
+            logoURL: true,
+          },
+        },
+      },
     });
 
     if (!user) {
@@ -42,6 +52,7 @@ export class AuthService {
       usuario: user.usuario,
       activo: user.activo,
       tenantId: user.tenantId,
+      logoURL: user.tenant?.logoURL,
     };
 
     return {
@@ -194,6 +205,95 @@ export class AuthService {
         ultimo_login: true,
       },
     });
+  }
+
+  async uploadTenantLogo(tenantId: string, file: Express.Multer.File) {
+    try {
+      const tenant = await this.prisma.tenant.findUnique({
+        where: {
+          id: tenantId,
+        },
+        select: {
+          id: true,
+          logoURL: true,
+        },
+      });
+
+      if (!tenant) {
+        throw new NotFoundException('Tenant no encontrado');
+      }
+
+      if (tenant?.logoURL) {
+        const imageId = this.cloudfareService.extractImageId(tenant.logoURL);
+
+        if (imageId) {
+          await this.cloudfareService.deleteImage(imageId);
+        }
+
+        console.log('Imagen anterior eliminada');
+      }
+
+      const imageId = await this.cloudfareService.uploadImage(file);
+
+      const imageUrl = this.cloudfareService.buildImageUrl(imageId);
+
+      const updatedTenant = await this.prisma.tenant.update({
+        where: {
+          id: tenantId,
+        },
+        data: {
+          logoURL: imageUrl,
+        },
+        select: {
+          id: true,
+          nombre: true,
+          logoURL: true,
+        },
+      });
+
+      return {
+        message: tenant.logoURL
+          ? 'Logo actualizado correctamente'
+          : 'Logo agregado correctamente',
+        data: updatedTenant,
+      };
+    } catch (error) {
+      if (error instanceof HttpException) throw error;
+
+      throw new InternalServerErrorException({
+        message: 'Error inesperado',
+        error: error instanceof Error ? error.message : 'Error desconocido',
+      });
+    }
+  }
+
+  async getCurrentUser(id: string) {
+    const user = await this.prisma.user.findUnique({
+      where: {
+        id,
+      },
+      include: {
+        tenant: {
+          select: {
+            nombre: true,
+            logoURL: true,
+          },
+        },
+      },
+    });
+
+    if (!user) {
+      throw new NotFoundException('Usuario no encontrado');
+    }
+
+    return {
+      id: user.id,
+      usuario: user.usuario,
+      email: user.email,
+      tenantId: user.tenantId,
+      company: user.tenant?.nombre,
+      logoURL: user.tenant?.logoURL,
+    };
   }
 
   async remove(id: string) {

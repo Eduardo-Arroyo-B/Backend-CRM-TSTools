@@ -73,6 +73,19 @@ export class CloudfareService {
     }
   }
 
+  extractImageId(imageUrl: string): string | null {
+    try {
+      const url = new URL(imageUrl);
+
+      // /<hash>/<imageId>/public
+      const segments = url.pathname.split("/").filter(Boolean);
+
+      return segments.length >= 2 ? segments[1] : null;
+    } catch {
+      return null;
+    }
+  }
+
   getImage(imageId: string) {
     return {
       imageId,
