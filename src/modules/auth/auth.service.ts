@@ -208,6 +208,7 @@ export class AuthService {
   }
 
   async uploadTenantLogo(tenantId: string, file: Express.Multer.File) {
+    console.log("entro a uploadTenantLogo");
     try {
       const tenant = await this.prisma.tenant.findUnique({
         where: {

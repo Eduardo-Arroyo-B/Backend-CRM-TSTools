@@ -19,6 +19,7 @@ export class CloudfareService {
   private readonly imageHash = process.env.CLOUDFLARE_IMAGES_HASH;
 
   async uploadImage(file: Express.Multer.File) {
+    console.log("entro a uploadImage");
     try {
       const { buffer, originalname, mimetype } = file;
       const formData = new FormData();

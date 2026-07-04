@@ -119,6 +119,7 @@ export class AuthController {
     @UploadedFile() file: Express.Multer.File,
     @Req() req: RequestWithUser,
   ) {
+    console.log("entro a tenant/logo");
     return this.authService.uploadTenantLogo(req.user.tenantId, file);
   }
 
