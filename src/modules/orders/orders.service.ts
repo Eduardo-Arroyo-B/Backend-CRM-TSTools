@@ -101,6 +101,11 @@ export class OrdersService {
           Clientes: {
             select: {
               nombre: true,
+              tenant: {
+                select: {
+                  nombre: true,
+                },
+              },
             },
           },
           Usuario: {
@@ -179,6 +184,8 @@ export class OrdersService {
         total: true,
         Clientes: true,
         estado_pago: true,
+        comentarios: true,
+        observaciones: true,
         Usuario: {
           select: {
             usuario: true,
