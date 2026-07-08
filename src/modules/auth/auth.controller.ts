@@ -11,6 +11,8 @@ import {
   Res,
   Req,
   UseGuards,
+  UseInterceptors,
+  UploadedFile,
 } from '@nestjs/common';
 import { Response } from 'express';
 import { AuthService } from './auth.service';
@@ -18,6 +20,7 @@ import { CreateAuthDto } from './dto/create-auth.dto';
 import { UpdateAuthDto } from './dto/update-auth.dto';
 import { AuthGuard } from '@nestjs/passport';
 import { RequestWithUser } from '../../common/utils/requestWithUser.utils';
+import { FileInterceptor } from '@nestjs/platform-express';
 
 @Controller('auth')
 export class AuthController {
@@ -67,10 +70,10 @@ export class AuthController {
     );
   }
 
-  @UseGuards(AuthGuard('jwt'))
   @Get('me')
+  @UseGuards(AuthGuard('jwt'))
   getMe(@Req() req: RequestWithUser) {
-    return req.user;
+    return this.authService.getCurrentUser(req.user.id);
   }
 
   @Post('logout')
@@ -106,6 +109,17 @@ export class AuthController {
   @HttpCode(HttpStatus.OK)
   update(@Param('id') id: string, @Body() updateAuthDto: UpdateAuthDto) {
     return this.authService.update(id, updateAuthDto);
+  }
+
+  @UseGuards(AuthGuard('jwt'))
+  @Post('tenant/logo')
+  @HttpCode(HttpStatus.OK)
+  @UseInterceptors(FileInterceptor('logo'))
+  uploadLogo(
+    @UploadedFile() file: Express.Multer.File,
+    @Req() req: RequestWithUser,
+  ) {
+    return this.authService.uploadTenantLogo(req.user.tenantId, file);
   }
 
   @Delete(':id')

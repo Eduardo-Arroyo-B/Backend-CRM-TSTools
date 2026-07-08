@@ -7,11 +7,13 @@ import { AuthService } from './auth.service';
 import { AuthController } from './auth.controller';
 import { JwtStrategy } from '../../common/guards/jwtStrategy.guard';
 import { GoogleStrategy } from '../../common/strategy/google.strategy';
+import { CloudfareModule } from '../cloudfare/cloudfare.module';
 
 @Module({
   imports: [
     ConfigModule,
     PassportModule,
+    CloudfareModule,
 
     JwtModule.registerAsync({
       inject: [ConfigService],

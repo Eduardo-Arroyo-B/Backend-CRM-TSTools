@@ -19,6 +19,7 @@ export class CloudfareService {
   private readonly imageHash = process.env.CLOUDFLARE_IMAGES_HASH;
 
   async uploadImage(file: Express.Multer.File) {
+    console.log("entro a uploadImage");
     try {
       const { buffer, originalname, mimetype } = file;
       const formData = new FormData();
@@ -40,6 +41,10 @@ export class CloudfareService {
       );
       return response.data.result.id;
     } catch (error) {
+      console.error(error.response?.data);
+      console.error(error.response?.status);
+      console.error(error.response?.headers);
+
       throw new InternalServerErrorException({
         message: 'Error al subir imagen a Cloudflare',
         error: error instanceof Error ? error.message : 'Error desconocido',
@@ -70,6 +75,19 @@ export class CloudfareService {
         message: 'Error al eliminar imagen',
         error: error instanceof Error ? error.message : 'Error desconocido',
       });
+    }
+  }
+
+  extractImageId(imageUrl: string): string | null {
+    try {
+      const url = new URL(imageUrl);
+
+      // /<hash>/<imageId>/public
+      const segments = url.pathname.split("/").filter(Boolean);
+
+      return segments.length >= 2 ? segments[1] : null;
+    } catch {
+      return null;
     }
   }
 

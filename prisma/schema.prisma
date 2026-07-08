@@ -106,6 +106,10 @@ model Orders {
   totalPagado Float   @default(0)
   descripcion String?
 
+  // Imagenes
+  imagenesObservaciones imagesObservations[]
+  imagenesComentarios   imagesComments[]
+
   // DATOS EQUIPO
   imei       String?
   enciende   Boolean @default(true)
@@ -171,6 +175,26 @@ model Devices {
 
   // Relaciones
   Servicios Services[]
+}
+
+model imagesObservations {
+  id       Int      @id @default(autoincrement())
+  ordenId  Int
+  imageURL String
+  createAt DateTime @default(now())
+
+  // Relaciones
+  orders Orders? @relation(fields: [ordenId], references: [id])
+}
+
+model imagesComments {
+  id       Int      @id @default(autoincrement())
+  ordenId  Int
+  imageURL String
+  createAt DateTime @default(now())
+
+  // Relaciones
+  orders Orders? @relation(fields: [ordenId], references: [id])
 }
 
 model ServiceTypes {
