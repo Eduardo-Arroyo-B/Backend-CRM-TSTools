@@ -14,6 +14,7 @@ import {
 } from '@nestjs/common';
 import { OrdersService } from './orders.service';
 import { CreateOrderDto } from './dto/create-order.dto';
+import { PayOrderDto } from './dto/PayOrder.dto';
 import { UpdateOrderDto } from './dto/update-order.dto';
 import { createCommentDto } from './dto/create-comment.dto';
 import { createObservationDto } from './dto/create-observation.dto';
@@ -125,6 +126,17 @@ export class OrdersController {
   @HttpCode(HttpStatus.OK)
   findTecnico(@Param('id') id: string, @Req() req: RequestWithUser) {
     return this.ordersService.finalizar(+id, req.user.tenantId);
+  }
+
+  @UseGuards(AuthGuard('jwt'))
+  @Post('pagarOrden/:id')
+  @HttpCode(HttpStatus.OK)
+  pagarOrden(
+    @Param('id') id: string,
+    @Body() pagarDto: PayOrderDto,
+    @Req() req: RequestWithUser,
+  ) {
+    return this.ordersService.pagarOrden(+id, pagarDto, req.user.tenantId);
   }
 
   @UseGuards(AuthGuard('jwt'))

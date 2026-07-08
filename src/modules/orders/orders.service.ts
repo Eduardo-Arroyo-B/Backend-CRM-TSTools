@@ -7,12 +7,14 @@ import {
 } from '@nestjs/common';
 import { CreateOrderDto } from './dto/create-order.dto';
 import { UpdateOrderDto } from './dto/update-order.dto';
+import { PayOrderDto } from './dto/PayOrder.dto';
 import { UpdateCommentDto } from './dto/update-comment.dto';
 import { createCommentDto } from './dto/create-comment.dto';
 import { createObservationDto } from './dto/create-observation.dto';
 import { PrismaService } from '../../prisma/prisma.service';
 import CryptoJS from 'crypto-js';
 import { UpdateOrderStatusDto } from './dto/update-order-status.dto';
+import { estadoPago } from '@prisma/client';
 
 @Injectable()
 export class OrdersService {
@@ -376,22 +378,59 @@ export class OrdersService {
     }
   }
 
-  async estadoPago(id: number, tenantId: string) {
+  async pagarOrden(id: number, dto: PayOrderDto, tenantId: string) {
     try {
-      const findOrder = await this.findOne(id, tenantId);
+      const order = await this.prisma.orders.findFirst({
+        where: {
+          id,
+          tenantId,
+        },
+      });
 
-      if (!findOrder) {
+      if (!order) {
         throw new NotFoundException('Orden no encontrada');
       }
 
+      if (order.estado_pago === 'PAGADO') {
+        throw new HttpException('La orden ya se encuentra liquidada', 400);
+      }
+
+      if (dto.monto <= 0) {
+        throw new HttpException('El monto debe ser mayor a 0', 400);
+      }
+
+      const nuevoTotalPagado = order.totalPagado + dto.monto;
+
+      if (nuevoTotalPagado > order.total) {
+        throw new HttpException(`No puedes cobrar más de $${order.total}`, 400);
+      }
+
+      let estadoPago: estadoPago;
+
+      if (nuevoTotalPagado === 0) {
+        estadoPago = 'PENDIENTE';
+      } else if (nuevoTotalPagado < order.total) {
+        estadoPago = 'DEBE';
+      } else {
+        estadoPago = 'PAGADO';
+      }
+
       const updatedOrder = await this.prisma.orders.update({
-        where: { id, tenantId },
-        data: { estado_pago: 'PAGADO' },
+        where: {
+          id,
+          tenantId,
+        },
+        data: {
+          totalPagado: nuevoTotalPagado,
+          estado_pago: estadoPago,
+        },
       });
 
       return {
-        message: 'Estado de pago actualizado exitosamente',
-        data: updatedOrder,
+        message: 'Pago registrado correctamente',
+        data: {
+          saldoPendiente: updatedOrder.total - updatedOrder.totalPagado,
+        },
       };
     } catch (error) {
       if (error instanceof HttpException) throw error;
