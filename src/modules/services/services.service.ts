@@ -19,21 +19,32 @@ export class ServicesService {
   async create(
     dto: CreateServiceDto,
     tenantId: string,
-    file?: Express.Multer.File,
+    image?: Express.Multer.File,
+    notesImage?: Express.Multer.File,
   ) {
     try {
       let imageUrl: string | null = null;
+      let notesImageUrl: string | null = null;
 
-      if (file) {
-        const imageId = await this.cloudfareService.uploadImage(file);
-
+      if (image) {
+        const imageId = await this.cloudfareService.uploadImage(image);
         imageUrl = this.cloudfareService.buildImageUrl(imageId);
       }
+
+      if (notesImage) {
+        const notesImageId =
+          await this.cloudfareService.uploadImage(notesImage);
+
+        notesImageUrl = this.cloudfareService.buildImageUrl(notesImageId);
+      }
+
+      console.log(dto)
 
       const createService = await this.prisma.services.create({
         data: {
           ...dto,
           fotoURL: imageUrl,
+          fotoNotasURL: notesImageUrl,
           tenantId,
         },
       });

@@ -7,7 +7,7 @@ import {
   Param,
   Delete,
   UseGuards,
-  UploadedFile,
+  UploadedFiles,
   UseInterceptors,
   Req,
 } from '@nestjs/common';
@@ -15,7 +15,7 @@ import { ServicesService } from './services.service';
 import { CreateServiceDto } from './dto/create-service.dto';
 import { UpdateServiceDto } from './dto/update-service.dto';
 import { AuthGuard } from '@nestjs/passport';
-import { FileInterceptor } from '@nestjs/platform-express';
+import { FileFieldsInterceptor } from '@nestjs/platform-express';
 import { RequestWithUser } from '../../common/utils/requestWithUser.utils';
 
 @UseGuards(AuthGuard('jwt'))
@@ -25,18 +25,33 @@ export class ServicesController {
 
   @Post()
   @UseInterceptors(
-    FileInterceptor('image', {
-      limits: {
-        fieldSize: 5 * 1024 * 1024,
+    FileFieldsInterceptor(
+      [
+        { name: 'image', maxCount: 1 },
+        { name: 'notesImage', maxCount: 1 },
+      ],
+      {
+        limits: {
+          fileSize: 5 * 1024 * 1024,
+        },
       },
-    }),
+    ),
   )
   create(
     @Body() dto: CreateServiceDto,
     @Req() req: RequestWithUser,
-    @UploadedFile() file?: Express.Multer.File,
+    @UploadedFiles()
+    files: {
+      image?: Express.Multer.File[];
+      notesImage?: Express.Multer.File[];
+    },
   ) {
-    return this.servicesService.create(dto, req.user.tenantId, file);
+    return this.servicesService.create(
+      dto,
+      req.user.tenantId,
+      files.image?.[0],
+      files.notesImage?.[0],
+    );
   }
 
   @Get()

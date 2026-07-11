@@ -156,6 +156,7 @@ model Services {
   notas            String?
   proceso          String?
   fotoURL          String?
+  fotoNotasURL     String?
   createAt         DateTime @default(now())
 
   // Relaciones
