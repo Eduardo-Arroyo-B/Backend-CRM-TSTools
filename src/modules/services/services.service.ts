@@ -82,6 +82,7 @@ export class ServicesService {
           notas: true,
           proceso: true,
           fotoURL: true,
+          fotoNotasURL: true,
           createAt: true,
         },
         orderBy: {
