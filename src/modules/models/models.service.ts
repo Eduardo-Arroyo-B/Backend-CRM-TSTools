@@ -14,9 +14,11 @@ export class ModelsService {
 
   async create(dto: CreateModelDto, userId: string, tenantId: string) {
     try {
+      await this.validateTenantBrand(dto.brandId, tenantId);
       const modelExist = await this.prisma.models.findFirst({
         where: {
           nombre: dto.nombre,
+          brandId: dto.brandId,
           tenantId,
         },
       });
@@ -39,6 +41,9 @@ export class ModelsService {
               usuario: true,
             },
           },
+          Marca: { select: { id: true, marca: true } },
+          brandId: true,
+          tenantId: true,
         },
       });
 
@@ -70,6 +75,7 @@ export class ModelsService {
             usuario: true,
           },
         },
+        Marca: { select: { id: true, marca: true } },
       },
       orderBy: {
         id: 'desc',
@@ -92,15 +98,34 @@ export class ModelsService {
 
   async update(id: number, updateModelDto: UpdateModelDto, tenantId: string) {
     // Valida que el modelo exista
-    await this.findOne(id, tenantId);
+    const currentModel = await this.findOne(id, tenantId);
 
     // Hace una copia de los datos a actualizar
     const dataToUpdate = { ...updateModelDto };
+
+    if (updateModelDto.brandId !== undefined) {
+      await this.validateTenantBrand(updateModelDto.brandId, tenantId);
+    }
+
+    const duplicate = await this.prisma.models.findFirst({
+      where: {
+        id: { not: id },
+        nombre: updateModelDto.nombre ?? currentModel.nombre,
+        brandId: updateModelDto.brandId ?? currentModel.brandId,
+        tenantId,
+      },
+      select: { id: true },
+    });
+
+    if (duplicate) {
+      throw new HttpException('El modelo ya existe para esta marca', 400);
+    }
 
     // Se actualiza el modelo
     return this.prisma.models.update({
       where: { id, tenantId },
       data: dataToUpdate,
+      include: { Marca: true, Usuario: { select: { usuario: true } } },
     });
   }
 
@@ -111,5 +136,22 @@ export class ModelsService {
     return this.prisma.models.delete({
       where: { id, tenantId },
     });
+  }
+
+  private async validateTenantBrand(brandId: number, tenantId: string) {
+    const brand = await this.prisma.brands.findFirst({
+      where: {
+        id: brandId,
+        OR: [{ tenantId: null }, { tenantId }],
+      },
+      select: { id: true },
+    });
+
+    if (!brand) {
+      throw new HttpException(
+        'La marca no existe o no está disponible para esta empresa',
+        400,
+      );
+    }
   }
 }

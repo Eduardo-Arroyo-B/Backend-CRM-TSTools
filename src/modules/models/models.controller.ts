@@ -9,6 +9,7 @@ import {
   HttpCode,
   HttpStatus,
   Req,
+  ParseIntPipe,
 } from '@nestjs/common';
 import { ModelsService } from './models.service';
 import { CreateModelDto } from './dto/create-model.dto';
@@ -36,23 +37,23 @@ export class ModelsController {
 
   @Get(':id')
   @HttpCode(HttpStatus.OK)
-  findOne(@Param('id') id: string, @Req() req: RequestWithUser) {
-    return this.modelsService.findOne(+id, req.user.tenantId);
+  findOne(@Param('id', ParseIntPipe) id: number, @Req() req: RequestWithUser) {
+    return this.modelsService.findOne(id, req.user.tenantId);
   }
 
   @Patch(':id')
   @HttpCode(HttpStatus.OK)
   update(
-    @Param('id') id: string,
+    @Param('id', ParseIntPipe) id: number,
     @Body() updateModelDto: UpdateModelDto,
     @Req() req: RequestWithUser,
   ) {
-    return this.modelsService.update(+id, updateModelDto, req.user.tenantId);
+    return this.modelsService.update(id, updateModelDto, req.user.tenantId);
   }
 
   @Delete(':id')
   @HttpCode(HttpStatus.NO_CONTENT)
-  remove(@Param('id') id: string, @Req() req: RequestWithUser) {
-    return this.modelsService.remove(+id, req.user.tenantId);
+  remove(@Param('id', ParseIntPipe) id: number, @Req() req: RequestWithUser) {
+    return this.modelsService.remove(id, req.user.tenantId);
   }
 }

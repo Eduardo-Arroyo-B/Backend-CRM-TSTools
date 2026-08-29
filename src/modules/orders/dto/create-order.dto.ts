@@ -44,7 +44,10 @@ export class CreateOrderDto {
   @IsNotEmpty({ message: 'estado no puede estar vacío' })
   estado: estado;
 
-  @IsInt({ message: 'total debe ser un número entero' })
+  @IsNumber(
+    { maxDecimalPlaces: 2 },
+    { message: 'total debe ser un número con máximo dos decimales' },
+  )
   @Min(0, { message: 'total no puede ser negativo' })
   @IsNotEmpty({ message: 'total no puede estar vacío' })
   @Type(() => Number)
@@ -101,9 +104,4 @@ export class CreateOrderDto {
   @Type(() => Number)
   @IsNumber({}, { message: 'garantia debe ser número' })
   garantia?: number;
-
-  @IsOptional()
-  @Type(() => Number)
-  @IsNumber({}, { message: 'pago debe ser número' })
-  pago?: number;
 }
