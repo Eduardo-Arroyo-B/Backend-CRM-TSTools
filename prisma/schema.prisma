@@ -213,6 +213,23 @@ model Products {
   @@index([modeloId])
 }
 
+/// Servicios ofrecidos globalmente por la empresa en el marketplace.
+/// No pertenecen a un tenant: todos los usuarios pueden consultarlos.
+model GlobalService {
+  id              Int      @id @default(autoincrement())
+  titulo          String
+  precio          Decimal  @db.Decimal(10, 2)
+  tiempoProceso   String
+  descripcion     String   @db.Text
+  incluye         String[]
+  compatibilidad  String[]
+  requisitos      String[] @default([])
+  createAt        DateTime @default(now())
+  updateAt        DateTime @updatedAt
+
+  @@map("services_global")
+}
+
 model Devices {
   id     Int    @id @default(autoincrement())
   nombre String
