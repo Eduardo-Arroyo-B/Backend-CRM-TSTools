@@ -14,22 +14,25 @@ export class BrandsService {
 
   async create(dto: CreateBrandDto, userId: string, tenantId: string) {
     try {
+      const targetTenantId = dto.esGlobal ? null : tenantId;
       const brandExist = await this.prisma.brands.findFirst({
-        where: { marca: dto.marca, tenantId },
+        where: { marca: dto.marca, tenantId: targetTenantId },
       });
 
       if (brandExist) throw new HttpException('La marca ya existe', 400);
 
       const brand = await this.prisma.brands.create({
         data: {
-          ...dto,
+          marca: dto.marca,
           usuario: userId,
-          tenantId,
+          tenantId: targetTenantId,
         },
         select: {
           id: true,
           marca: true,
           createAt: true,
+          tenantId: true,
+          Modelos: { select: { id: true, nombre: true } },
           Usuario: {
             select: {
               usuario: true,
@@ -77,9 +80,6 @@ export class BrandsService {
         marca: 'desc',
       },
     });
-
-    if (allBrands.length === 0)
-      throw new NotFoundException('No se encontraron marcas');
 
     return allBrands;
   }
