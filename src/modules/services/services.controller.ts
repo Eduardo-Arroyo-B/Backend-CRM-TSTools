@@ -41,7 +41,7 @@ export class ServicesController {
     @Body() dto: CreateServiceDto,
     @Req() req: RequestWithUser,
     @UploadedFiles()
-    files: {
+    files?: {
       image?: Express.Multer.File[];
       notesImage?: Express.Multer.File[];
     },
@@ -49,8 +49,8 @@ export class ServicesController {
     return this.servicesService.create(
       dto,
       req.user.tenantId,
-      files.image?.[0],
-      files.notesImage?.[0],
+      files?.image?.[0],
+      files?.notesImage?.[0],
     );
   }
 
