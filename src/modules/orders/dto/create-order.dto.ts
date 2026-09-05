@@ -104,9 +104,4 @@ export class CreateOrderDto {
   @Type(() => Number)
   @IsNumber({}, { message: 'garantia debe ser número' })
   garantia?: number;
-
-  @IsOptional()
-  @Type(() => Number)
-  @IsNumber({}, { message: 'pago debe ser número' })
-  pago?: number;
 }

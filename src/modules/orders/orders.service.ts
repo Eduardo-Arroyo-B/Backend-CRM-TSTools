@@ -14,7 +14,7 @@ import { createObservationDto } from './dto/create-observation.dto';
 import { PrismaService } from '../../prisma/prisma.service';
 import CryptoJS from 'crypto-js';
 import { UpdateOrderStatusDto } from './dto/update-order-status.dto';
-import { estadoPago } from '@prisma/client';
+import { estadoPago, Prisma } from '@prisma/client';
 
 @Injectable()
 export class OrdersService {
@@ -25,7 +25,7 @@ export class OrdersService {
       // eslint-disable-next-line @typescript-eslint/no-unsafe-assignment,@typescript-eslint/no-unsafe-call,@typescript-eslint/no-unsafe-member-access
       const trackingToken = CryptoJS.lib.WordArray.random(32).toString();
 
-      const initialPayment = dto.pago ?? 0;
+      const initialPayment = 0;
 
       if (initialPayment < 0 || initialPayment > dto.total) {
         throw new HttpException(
@@ -91,7 +91,6 @@ export class OrdersService {
           golpes: true,
           mojado: true,
           garantia: true,
-          pago: true,
           trackingToken: true,
           observaciones: {
             select: {
@@ -442,17 +441,22 @@ export class OrdersService {
         throw new HttpException('El monto debe ser mayor a 0', 400);
       }
 
-      const nuevoTotalPagado = order.totalPagado + dto.monto;
+      const nuevoTotalPagado = order.totalPagado.plus(
+        new Prisma.Decimal(dto.monto),
+      );
 
-      if (nuevoTotalPagado > order.total) {
-        throw new HttpException(`No puedes cobrar más de $${order.total}`, 400);
+      if (nuevoTotalPagado.greaterThan(order.total)) {
+        throw new HttpException(
+          `No puedes cobrar más de $${order.total.toString()}`,
+          400,
+        );
       }
 
       let estadoPago: estadoPago;
 
-      if (nuevoTotalPagado === 0) {
+      if (nuevoTotalPagado.isZero()) {
         estadoPago = 'PENDIENTE';
-      } else if (nuevoTotalPagado < order.total) {
+      } else if (nuevoTotalPagado.lessThan(order.total)) {
         estadoPago = 'DEBE';
       } else {
         estadoPago = 'PAGADO';
@@ -472,7 +476,7 @@ export class OrdersService {
       return {
         message: 'Pago registrado correctamente',
         data: {
-          saldoPendiente: updatedOrder.total - updatedOrder.totalPagado,
+          saldoPendiente: updatedOrder.total.minus(updatedOrder.totalPagado),
         },
       };
     } catch (error) {

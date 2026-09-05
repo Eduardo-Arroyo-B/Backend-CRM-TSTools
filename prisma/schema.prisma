@@ -29,15 +29,16 @@ model User {
   updateAt DateTime @updatedAt
 
   // Relaciones
-  Clientes Clients[]
-  Marcas   Brands[]
-  Modelos  Models[]
-  Ordenes  Orders[]
-  Tecnicos Technical[]
-  tenant   Tenant?     @relation(fields: [tenantId], references: [id])
-  tenantId String?     @db.Uuid
-  role     Role?       @relation(fields: [roleId], references: [id])
-  roleId   String?     @db.Uuid
+  Clientes  Clients[]
+  Marcas    Brands[]
+  Modelos   Models[]
+  Ordenes   Orders[]
+  Tecnicos  Technical[]
+  Productos Products[] @relation("ProductCreator")
+  tenant    Tenant?    @relation(fields: [tenantId], references: [id])
+  tenantId  String?    @db.Uuid
+  role      Role?      @relation(fields: [roleId], references: [id])
+  roleId    String?    @db.Uuid
 }
 
 model Role {
@@ -83,6 +84,7 @@ model Brands {
   Modelos   Models[]
   Ordenes   Orders[]
   Servicios Services[]
+  Productos Products[]
   tenant    Tenant?    @relation(fields: [tenantId], references: [id])
 
   @@unique([marca, tenantId])
@@ -100,6 +102,7 @@ model Models {
   Usuario   User       @relation(fields: [usuarioId], references: [id])
   Ordenes   Orders[]
   Servicios Services[]
+  Productos Products[]
   tenant    Tenant?    @relation(fields: [tenantId], references: [id])
 
   @@unique([brandId, nombre, tenantId])
@@ -118,8 +121,8 @@ model Orders {
   estado      estado
   estado_pago estadoPago
 
-  total       Float
-  totalPagado Float   @default(0)
+  total       Decimal @db.Decimal(12, 2)
+  totalPagado Decimal @default(0) @db.Decimal(12, 2)
   descripcion String?
 
   // Imagenes
@@ -142,11 +145,11 @@ model Orders {
 
   // COMERCIAL
   garantia Int?
-  pago     Int?
 
   // Validacion para seguimiento
   trackingToken String   @unique
   createAt      DateTime @default(now())
+  updateAt      DateTime @updatedAt
 
   // Relaciones
   Clientes Clients    @relation(fields: [clienteId], references: [id])
@@ -157,6 +160,11 @@ model Orders {
   Tecnico  Technical? @relation(fields: [tecnicoId], references: [id])
   tenant   Tenant?    @relation(fields: [tenantId], references: [id])
   tenantId String?    @db.Uuid
+
+  @@index([tenantId, estado])
+  @@index([tenantId, estado_pago])
+  @@index([clienteId])
+  @@index([tecnicoId])
 }
 
 model Services {
@@ -167,13 +175,15 @@ model Services {
   marcaId          Int
   modeloId         Int
   garantia         String
-  precio_publico   String
-  precio_mayorista String
+  precio_publico   Decimal  @db.Decimal(12, 2)
+  precio_mayorista Decimal  @db.Decimal(12, 2)
   notas            String?
   proceso          String?
   fotoURL          String?
   fotoNotasURL     String?
   createAt         DateTime @default(now())
+  updateAt         DateTime @updatedAt
+  activo           Boolean  @default(true)
 
   // Relaciones
   Marca        Brands       @relation(fields: [marcaId], references: [id])
@@ -184,6 +194,39 @@ model Services {
   Ordenes      Orders[]
   tenant       Tenant?      @relation(fields: [tenantId], references: [id])
   tenantId     String?      @db.Uuid
+
+  @@unique([tenantId, tipo_servicio, equipoId, conceptoId, marcaId, modeloId])
+  @@index([tenantId, activo])
+}
+
+model Products {
+  id               Int      @id @default(autoincrement())
+  nombre           String
+  sku              String
+  descripcion      String?
+  categoria        String?
+  costo            Decimal  @default(0) @db.Decimal(12, 2)
+  precio_publico   Decimal  @db.Decimal(12, 2)
+  precio_mayorista Decimal? @db.Decimal(12, 2)
+  stock            Int      @default(0)
+  stockMinimo      Int      @default(0)
+  activo           Boolean  @default(true)
+  imagenURL        String?
+  marcaId          Int?
+  modeloId         Int?
+  creadorId        String   @db.Uuid
+  createAt         DateTime @default(now())
+  updateAt         DateTime @updatedAt
+
+  Marca   Brands? @relation(fields: [marcaId], references: [id], onDelete: SetNull)
+  Modelo  Models? @relation(fields: [modeloId], references: [id], onDelete: SetNull)
+  Creador User    @relation("ProductCreator", fields: [creadorId], references: [id])
+
+  @@unique([sku])
+  @@index([activo])
+  @@index([categoria])
+  @@index([marcaId])
+  @@index([modeloId])
 }
 
 /// Servicios ofrecidos globalmente por la empresa en el marketplace.
@@ -218,7 +261,7 @@ model imagesObservations {
   createAt DateTime @default(now())
 
   // Relaciones
-  orders Orders? @relation(fields: [ordenId], references: [id])
+  orders Orders @relation(fields: [ordenId], references: [id], onDelete: Cascade)
 }
 
 model imagesComments {
@@ -228,7 +271,7 @@ model imagesComments {
   createAt DateTime @default(now())
 
   // Relaciones
-  orders Orders? @relation(fields: [ordenId], references: [id])
+  orders Orders @relation(fields: [ordenId], references: [id], onDelete: Cascade)
 }
 
 model ServiceTypes {
@@ -259,7 +302,7 @@ model Observaciones {
   createAt    DateTime @default(now())
 
   // Relaciones
-  orders Orders? @relation(fields: [ordenId], references: [id])
+  orders Orders @relation(fields: [ordenId], references: [id], onDelete: Cascade)
 }
 
 model Comentarios {
@@ -269,7 +312,7 @@ model Comentarios {
   createAt   DateTime @default(now())
 
   // Relaciones
-  orders Orders? @relation(fields: [ordenId], references: [id])
+  orders Orders @relation(fields: [ordenId], references: [id], onDelete: Cascade)
 }
 
 model Technical {
