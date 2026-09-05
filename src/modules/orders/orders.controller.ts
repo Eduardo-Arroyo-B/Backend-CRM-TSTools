@@ -22,27 +22,34 @@ import { UpdateOrderStatusDto } from './dto/update-order-status.dto';
 import { RequestWithUser } from '../../common/utils/requestWithUser.utils';
 import { AuthGuard } from '@nestjs/passport';
 import { UpdateCommentDto } from './dto/update-comment.dto';
+import {
+  AuthorizationGuard,
+  RequirePermissions,
+} from '../../common/auth/authorization.guard';
 
 @Controller('orders')
 export class OrdersController {
   constructor(private readonly ordersService: OrdersService) {}
 
-  @UseGuards(AuthGuard('jwt'))
   @Post()
+  @UseGuards(AuthGuard('jwt'), AuthorizationGuard)
+  @RequirePermissions('create_orders')
   @HttpCode(HttpStatus.CREATED)
   create(@Body() dto: CreateOrderDto, @Req() req: RequestWithUser) {
     return this.ordersService.create(dto, req.user.id, req.user.tenantId);
   }
 
-  @UseGuards(AuthGuard('jwt'))
   @Get()
+  @UseGuards(AuthGuard('jwt'), AuthorizationGuard)
+  @RequirePermissions('view_orders')
   @HttpCode(HttpStatus.OK)
   findAll(@Req() req: RequestWithUser) {
     return this.ordersService.findAll(req.user.tenantId);
   }
 
-  @UseGuards(AuthGuard('jwt'))
   @Get(':id')
+  @UseGuards(AuthGuard('jwt'), AuthorizationGuard)
+  @RequirePermissions('view_orders')
   @HttpCode(HttpStatus.OK)
   findOne(@Param('id') id: string, @Req() req: RequestWithUser) {
     return this.ordersService.findOne(+id, req.user.tenantId);
@@ -53,8 +60,9 @@ export class OrdersController {
     return this.ordersService.findTracking(+id, token);
   }
 
-  @UseGuards(AuthGuard('jwt'))
   @Patch(':id')
+  @UseGuards(AuthGuard('jwt'), AuthorizationGuard)
+  @RequirePermissions('edit_orders')
   @HttpCode(HttpStatus.OK)
   update(
     @Param('id') id: string,
@@ -64,8 +72,9 @@ export class OrdersController {
     return this.ordersService.update(+id, updateOrderDto, req.user.tenantId);
   }
 
-  @UseGuards(AuthGuard('jwt'))
   @Patch('status/:id')
+  @UseGuards(AuthGuard('jwt'), AuthorizationGuard)
+  @RequirePermissions('edit_orders')
   @HttpCode(HttpStatus.OK)
   updateStatus(
     @Param('id') id: string,
@@ -79,15 +88,17 @@ export class OrdersController {
     );
   }
 
-  @UseGuards(AuthGuard('jwt'))
   @Patch('statusReturn/:id')
+  @UseGuards(AuthGuard('jwt'), AuthorizationGuard)
+  @RequirePermissions('edit_orders')
   @HttpCode(HttpStatus.OK)
   updateStatusReturn(@Param('id') id: string, @Req() req: RequestWithUser) {
     return this.ordersService.updateStatusReturn(+id, req.user.tenantId);
   }
 
-  @UseGuards(AuthGuard('jwt'))
   @Patch('comments/:id')
+  @UseGuards(AuthGuard('jwt'), AuthorizationGuard)
+  @RequirePermissions('edit_orders')
   @HttpCode(HttpStatus.OK)
   updateComments(
     @Param('id') id: string,
@@ -101,8 +112,9 @@ export class OrdersController {
     );
   }
 
-  @UseGuards(AuthGuard('jwt'))
   @Post('createComments/:id')
+  @UseGuards(AuthGuard('jwt'), AuthorizationGuard)
+  @RequirePermissions('edit_orders')
   @HttpCode(HttpStatus.OK)
   createComment(
     @Param('id') id: string,
@@ -111,8 +123,9 @@ export class OrdersController {
     return this.ordersService.createComment(+id, createCommentDto);
   }
 
-  @UseGuards(AuthGuard('jwt'))
   @Post('createObservation/:id')
+  @UseGuards(AuthGuard('jwt'), AuthorizationGuard)
+  @RequirePermissions('edit_orders')
   @HttpCode(HttpStatus.OK)
   createObservation(
     @Param('id') id: string,
@@ -121,15 +134,17 @@ export class OrdersController {
     return this.ordersService.createObservations(+id, createObservationDto);
   }
 
-  @UseGuards(AuthGuard('jwt'))
   @Patch('finalizar/:id')
+  @UseGuards(AuthGuard('jwt'), AuthorizationGuard)
+  @RequirePermissions('edit_orders')
   @HttpCode(HttpStatus.OK)
   findTecnico(@Param('id') id: string, @Req() req: RequestWithUser) {
     return this.ordersService.finalizar(+id, req.user.tenantId);
   }
 
-  @UseGuards(AuthGuard('jwt'))
   @Post('pagarOrden/:id')
+  @UseGuards(AuthGuard('jwt'), AuthorizationGuard)
+  @RequirePermissions('edit_orders')
   @HttpCode(HttpStatus.OK)
   pagarOrden(
     @Param('id') id: string,
@@ -139,8 +154,9 @@ export class OrdersController {
     return this.ordersService.pagarOrden(+id, pagarDto, req.user.tenantId);
   }
 
-  @UseGuards(AuthGuard('jwt'))
   @Delete(':id')
+  @UseGuards(AuthGuard('jwt'), AuthorizationGuard)
+  @RequirePermissions('delete_orders')
   @HttpCode(HttpStatus.NO_CONTENT)
   remove(@Param('id') id: string, @Req() req: RequestWithUser) {
     return this.ordersService.remove(+id, req.user.tenantId);

@@ -46,7 +46,7 @@ export class CreateOrderDto {
 
   @IsNumber(
     { maxDecimalPlaces: 2 },
-    { message: 'total debe ser un número con máximo dos decimales' },
+    { message: 'total debe ser un número con máximo 2 decimales' },
   )
   @Min(0, { message: 'total no puede ser negativo' })
   @IsNotEmpty({ message: 'total no puede estar vacío' })

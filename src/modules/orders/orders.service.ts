@@ -25,9 +25,29 @@ export class OrdersService {
       // eslint-disable-next-line @typescript-eslint/no-unsafe-assignment,@typescript-eslint/no-unsafe-call,@typescript-eslint/no-unsafe-member-access
       const trackingToken = CryptoJS.lib.WordArray.random(32).toString();
 
+      const initialPayment = 0;
+
+      if (initialPayment < 0 || initialPayment > dto.total) {
+        throw new HttpException(
+          'El anticipo debe estar entre 0 y el total de la orden',
+          400,
+        );
+      }
+
+      const paymentStatus: estadoPago =
+        dto.total === 0
+          ? 'SINCOSTO'
+          : initialPayment === 0
+            ? 'PENDIENTE'
+            : initialPayment < dto.total
+              ? 'DEBE'
+              : 'PAGADO';
+
       const createdOrder = await this.prisma.orders.create({
         data: {
           ...dto,
+          totalPagado: initialPayment,
+          estado_pago: paymentStatus,
           atendio: userId,
           tenantId,
           // eslint-disable-next-line @typescript-eslint/no-unsafe-assignment
@@ -60,8 +80,17 @@ export class OrdersService {
           createAt: true,
           estado: true,
           total: true,
+          totalPagado: true,
           estado_pago: true,
           descripcion: true,
+          imei: true,
+          contrasena: true,
+          enciende: true,
+          bateria: true,
+          bandejaSim: true,
+          golpes: true,
+          mojado: true,
+          garantia: true,
           trackingToken: true,
           observaciones: {
             select: {
@@ -92,6 +121,11 @@ export class OrdersService {
           },
           Servicio: {
             select: {
+              garantia: true,
+              precio_publico: true,
+              precio_mayorista: true,
+              notas: true,
+              proceso: true,
               TipoServicio: {
                 select: {
                   nombre: true,
@@ -103,6 +137,7 @@ export class OrdersService {
           Clientes: {
             select: {
               nombre: true,
+              telefono: true,
               tenant: {
                 select: {
                   nombre: true,
