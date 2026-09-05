@@ -36,6 +36,22 @@ model User {
   Tecnicos Technical[]
   tenant   Tenant?     @relation(fields: [tenantId], references: [id])
   tenantId String?     @db.Uuid
+  role     Role?       @relation(fields: [roleId], references: [id])
+  roleId   String?     @db.Uuid
+}
+
+model Role {
+  id       String   @id @default(uuid()) @db.Uuid
+  nombre   String
+  tipo     RoleType @default(USUARIO)
+  permisos String[] @default([])
+  tenantId String?  @db.Uuid
+  tenant   Tenant?  @relation(fields: [tenantId], references: [id], onDelete: Cascade)
+  usuarios User[]
+  createAt DateTime @default(now())
+  updateAt DateTime @updatedAt
+
+  @@unique([nombre, tenantId])
 }
 
 model Clients {
@@ -173,16 +189,16 @@ model Services {
 /// Servicios ofrecidos globalmente por la empresa en el marketplace.
 /// No pertenecen a un tenant: todos los usuarios pueden consultarlos.
 model GlobalService {
-  id              Int      @id @default(autoincrement())
-  titulo          String
-  precio          Decimal  @db.Decimal(10, 2)
-  tiempoProceso   String
-  descripcion     String   @db.Text
-  incluye         String[]
-  compatibilidad  String[]
-  requisitos      String[] @default([])
-  createAt        DateTime @default(now())
-  updateAt        DateTime @updatedAt
+  id             Int      @id @default(autoincrement())
+  titulo         String
+  precio         Decimal  @db.Decimal(10, 2)
+  tiempoProceso  String
+  descripcion    String   @db.Text
+  incluye        String[]
+  compatibilidad String[]
+  requisitos     String[] @default([])
+  createAt       DateTime @default(now())
+  updateAt       DateTime @updatedAt
 
   @@map("services_global")
 }
@@ -283,6 +299,13 @@ model Tenant {
   ordenes   Orders[]
   servicios Services[]
   tecnicos  Technical[]
+  roles     Role[]
+}
+
+enum RoleType {
+  SADMIN
+  ADMIN
+  USUARIO
 }
 
 enum estado {

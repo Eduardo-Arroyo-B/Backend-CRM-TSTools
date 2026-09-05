@@ -23,6 +23,7 @@ export class AuthService {
     const user = await this.prisma.user.findUnique({
       where: { usuario },
       include: {
+        role: true,
         tenant: {
           select: {
             logoURL: true,
@@ -53,6 +54,8 @@ export class AuthService {
       activo: user.activo,
       tenantId: user.tenantId,
       logoURL: user.tenant?.logoURL,
+      role: user.role?.tipo ?? (user.tenantId ? 'ADMIN' : 'USUARIO'),
+      permissions: user.role?.permisos ?? [],
     };
 
     return {
@@ -78,8 +81,9 @@ export class AuthService {
         },
       });
 
-      user = await this.prisma.user.create({
-        data: {
+      user = await this.prisma.$transaction(async (tx) => {
+        const adminRole = await tx.role.create({ data: { nombre: 'Administrador', tipo: 'ADMIN', tenantId: tenant.id } });
+        return tx.user.create({ data: {
           usuario: username,
           email,
           activo: true,
@@ -88,7 +92,8 @@ export class AuthService {
           ultimo_login: new Date(),
 
           tenantId: tenant.id,
-        },
+          roleId: adminRole.id,
+        } });
       });
     } else {
       await this.prisma.user.update({
@@ -273,6 +278,7 @@ export class AuthService {
         id,
       },
       include: {
+        role: true,
         tenant: {
           select: {
             nombre: true,
@@ -293,6 +299,9 @@ export class AuthService {
       tenantId: user.tenantId,
       company: user.tenant?.nombre,
       logoURL: user.tenant?.logoURL,
+      role: user.role?.tipo ?? (user.tenantId ? 'ADMIN' : 'USUARIO'),
+      roleName: user.role?.nombre ?? 'Administrador',
+      permissions: user.role?.permisos ?? [],
     };
   }
 

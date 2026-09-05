@@ -16,6 +16,8 @@ import { ServicetypesModule } from './modules/servicetypes/servicetypes.module';
 import { CloudfareModule } from './modules/cloudfare/cloudfare.module';
 import { TechnicalModule } from './modules/technical/technical.module';
 import { ServicesGlobalModule } from './modules/services_global/services_global.module';
+import { UsersModule } from './modules/users/users.module';
+import { RolsModule } from './modules/rols/rols.module';
 
 @Module({
   imports: [
@@ -36,6 +38,8 @@ import { ServicesGlobalModule } from './modules/services_global/services_global.
     CloudfareModule,
     TechnicalModule,
     ServicesGlobalModule,
+    UsersModule,
+    RolsModule,
   ],
   controllers: [AppController],
   providers: [AppService],
