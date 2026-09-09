@@ -143,7 +143,7 @@ model Orders {
 
   // COMERCIAL
   garantia Int?
-  pago     Int?
+  pago     Float?
 
   // Validacion para seguimiento
   trackingToken String   @unique
