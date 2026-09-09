@@ -43,16 +43,25 @@ export class OrdersService {
               ? 'DEBE'
               : 'PAGADO';
 
-      const createdOrder = await this.prisma.orders.create({
-        data: {
-          ...dto,
-          totalPagado: initialPayment,
-          estado_pago: paymentStatus,
-          atendio: userId,
-          tenantId,
-          // eslint-disable-next-line @typescript-eslint/no-unsafe-assignment
-          trackingToken,
-        },
+      const createdOrder = await this.prisma.$transaction(async (tx) => {
+        const counter = await tx.tenantOrderCounter.upsert({
+          where: { tenantId },
+          update: { nextValue: { increment: 1 } },
+          create: { tenantId, nextValue: 2 },
+        });
+
+        return tx.orders.create({
+          data: {
+            ...dto,
+            folio: counter.nextValue - 1,
+            totalPagado: initialPayment,
+            estado_pago: paymentStatus,
+            atendio: userId,
+            tenantId,
+            // eslint-disable-next-line @typescript-eslint/no-unsafe-assignment
+            trackingToken,
+          },
+        });
       });
 
       return {
@@ -77,6 +86,7 @@ export class OrdersService {
         },
         select: {
           id: true,
+          folio: true,
           createAt: true,
           estado: true,
           total: true,
@@ -153,7 +163,7 @@ export class OrdersService {
           },
         },
         orderBy: {
-          id: 'desc',
+          folio: 'desc',
         },
       });
 
@@ -177,6 +187,7 @@ export class OrdersService {
         },
         select: {
           id: true,
+          folio: true,
           createAt: true,
           estado: true,
           total: true,
@@ -217,6 +228,7 @@ export class OrdersService {
       },
       select: {
         id: true,
+        folio: true,
         createAt: true,
         estado: true,
         total: true,

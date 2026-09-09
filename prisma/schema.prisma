@@ -106,7 +106,8 @@ model Models {
 }
 
 model Orders {
-  id Int @id @default(autoincrement())
+  id    Int  @id @default(autoincrement())
+  folio Int?
 
   clienteId  Int
   marcaId    Int
@@ -157,6 +158,15 @@ model Orders {
   Tecnico  Technical? @relation(fields: [tecnicoId], references: [id])
   tenant   Tenant?    @relation(fields: [tenantId], references: [id])
   tenantId String?    @db.Uuid
+
+  @@unique([tenantId, folio])
+}
+
+/// Contador atómico del siguiente folio de órdenes para cada compañía.
+model TenantOrderCounter {
+  tenantId  String @id @db.Uuid
+  nextValue Int    @default(1)
+  tenant    Tenant @relation(fields: [tenantId], references: [id], onDelete: Cascade)
 }
 
 model Services {
@@ -292,14 +302,15 @@ model Tenant {
   createAt DateTime @default(now())
   updateAt DateTime @updatedAt
 
-  usuarios  User[]
-  clientes  Clients[]
-  marcas    Brands[]
-  modelos   Models[]
-  ordenes   Orders[]
-  servicios Services[]
-  tecnicos  Technical[]
-  roles     Role[]
+  usuarios     User[]
+  clientes     Clients[]
+  marcas       Brands[]
+  modelos      Models[]
+  ordenes      Orders[]
+  servicios    Services[]
+  tecnicos     Technical[]
+  roles        Role[]
+  orderCounter TenantOrderCounter?
 }
 
 enum RoleType {
